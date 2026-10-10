@@ -519,23 +519,30 @@ function animate() {
 }
 ```
 
-## WebGPU Post-Processing (Three.js r150+)
+## WebGPU Post-Processing (TSL, Three.js r171+)
+
+The node-based pipeline only works with `WebGPURenderer` (imported from `three/webgpu`), not with `WebGLRenderer` + `EffectComposer`. Do not mix the two systems. The API is still evolving between releases, so check the official `webgpu_postprocessing_*` examples for the version you pin.
 
 ```javascript
-import { postProcessing } from "three/addons/nodes/Nodes.js";
-import { pass, bloom, dof } from "three/addons/nodes/Nodes.js";
+import * as THREE from "three/webgpu";
+import { pass } from "three/tsl";
+import { bloom } from "three/addons/tsl/display/BloomNode.js";
 
-// Using node-based system
-const scenePass = pass(scene, camera);
-const bloomNode = bloom(scenePass, 0.5, 0.4, 0.85);
+const renderer = new THREE.WebGPURenderer({ antialias: true });
+await renderer.init();
 
 const postProcessing = new THREE.PostProcessing(renderer);
-postProcessing.outputNode = bloomNode;
 
-// Render
-function animate() {
+const scenePass = pass(scene, camera);
+const scenePassColor = scenePass.getTextureNode("output");
+
+// bloom(input, strength, radius, threshold)
+const bloomPass = bloom(scenePassColor, 0.5, 0.4, 0.85);
+postProcessing.outputNode = scenePassColor.add(bloomPass);
+
+renderer.setAnimationLoop(() => {
   postProcessing.render();
-}
+});
 ```
 
 ## Performance Tips

@@ -150,6 +150,8 @@ material.envMap = cubeTexture;
 
 ### HDR/EXR Loading
 
+> **Version note:** In r179+ `RGBELoader` is deprecated in favour of `HDRLoader` (`three/addons/loaders/HDRLoader.js`), which has the same `load()` API. On newer releases, swap the class name. On older releases, keep `RGBELoader`.
+
 ```javascript
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
