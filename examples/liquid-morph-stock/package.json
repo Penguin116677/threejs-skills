@@ -1,0 +1,28 @@
+{
+  "name": "liquid-morph-stock",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Procedural liquid-chrome morph loop (Three.js + raymarched GLSL) with a deterministic 4K frame renderer and H.264 export pipeline.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "test": "node scripts/test-timeline.js",
+    "check": "node scripts/check-preview.js",
+    "render:preview": "node scripts/render-frames.js --mode preview",
+    "render:final": "node scripts/render-frames.js --mode final",
+    "encode:preview": "node scripts/encode-video.js --mode preview",
+    "encode:final": "node scripts/encode-video.js --mode final",
+    "validate:preview": "node scripts/validate-video.js --mode preview",
+    "validate:final": "node scripts/validate-video.js --mode final",
+    "export:preview": "npm run render:preview && npm run encode:preview && npm run validate:preview",
+    "export:final": "npm run render:final && npm run encode:final && npm run validate:final"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "playwright-core": "1.56.1",
+    "vite": "6.3.6"
+  }
+}

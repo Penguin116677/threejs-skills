@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Liquid Morph — Preview</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #030304; overflow: hidden; }
+      #stage { position: fixed; inset: 0; display: grid; place-items: center; }
+      /* Always show the full 16:9 frame (letterboxed), exactly as exported. */
+      #view { width: min(100vw, calc(100vh * 16 / 9)); aspect-ratio: 16 / 9; display: block; }
+      #hud { position: fixed; left: 12px; bottom: 12px; margin: 0; color: #8a90a0;
+             font: 12px/1.45 ui-monospace, Menlo, monospace; white-space: pre; pointer-events: none; }
+      #error { position: fixed; inset: auto 12px 12px 12px; padding: 12px; background: #2a0d12;
+               color: #ffb4bf; font: 13px/1.4 ui-monospace, monospace; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div id="stage"><canvas id="view"></canvas></div>
+    <pre id="hud"></pre>
+    <pre id="error" hidden></pre>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
