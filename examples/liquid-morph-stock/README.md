@@ -65,12 +65,15 @@ npm run validate:final   # spec + visual QC; exits non-zero on any failure
 
 **Resuming.** Each frame is written to disk as soon as it is rendered (atomically, through a `.tmp` file and a rename). Interrupting with Ctrl-C finishes the current frame and exits. Running the same command again renders only the frames that are missing or incomplete. Memory use stays flat, because no more than one frame is held at a time.
 
+The resume path has been exercised for real. The reference 4K render was killed by a container restart at frame 41 and continued from frame 41 when re-run.
+
 **Speed.** Measured in a 4-core cloud container with no GPU (SwiftShader):
 
 | Profile | Time per frame | Full 450 frames |
 |---|---|---|
-| 720p preview (adaptive AA) | ≈1.5–2 s | ≈13 min |
-| 4K final (adaptive AA) | ≈12–18 s | ≈1.5–2 h |
+| 720p preview (adaptive AA) | ≈1.5–2 s | ≈16 min |
+| 4K final (adaptive AA) | ≈12–17 s | ≈1 h 45 min |
+| 4K encode (libx264 `slow`, CRF 14) | | ≈2 min, about 40 MB, 21 Mb/s |
 
 A desktop GPU with `--gpu` should take well under a second per 4K frame.
 
