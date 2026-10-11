@@ -13,17 +13,29 @@ When working with Three.js, Claude Code starts with general programming knowledg
 
 ## Installation
 
-Clone this repository into your project or copy the `.claude/skills` directory:
+The skills live in `.claude/skills/<skill-name>/SKILL.md`, which is the location Claude Code scans for project skills.
+
+**Option 1: work inside this repository (simplest, works from a phone).**
+Open a Claude Code session on this repository (for example at [claude.ai/code](https://claude.ai/code)). All skills are discovered automatically when the session starts.
+
+**Option 2: use the skills in another project.**
+Copy the `.claude/skills` directory into the root of that project:
 
 ```bash
-git clone https://github.com/pinkforest/threejs-playground.git
+git clone https://github.com/Penguin116677/threejs-skills.git
+mkdir -p your-project/.claude
+cp -r threejs-skills/.claude/skills your-project/.claude/
 ```
 
-Or add as a submodule:
+**Option 3: make them available in every project on your machine.**
+Copy the skill folders into your personal skills directory:
 
 ```bash
-git submodule add https://github.com/pinkforest/threejs-playground.git
+mkdir -p ~/.claude/skills
+cp -r threejs-skills/.claude/skills/* ~/.claude/skills/
 ```
+
+Skills are loaded when a session starts. Start a new session after adding them.
 
 ## Skills Included
 
@@ -39,6 +51,8 @@ git submodule add https://github.com/pinkforest/threejs-playground.git
 | **threejs-shaders**        | GLSL basics, ShaderMaterial, uniforms, custom effects                   |
 | **threejs-postprocessing** | EffectComposer, bloom, DOF, screen effects, custom passes               |
 | **threejs-interaction**    | Raycasting, camera controls, mouse/touch input, object selection        |
+| **threejs-particles-cinematic** | Glowing particles, curl-noise flow, GPGPU simulation, mesh-surface sampling, shape morphing, trails + bloom |
+| **threejs-product-motion** | Product studio lighting, auto-framing, deterministic timelines, camera moves, hero shots, social formats, video export |
 
 ## How It Works
 
@@ -48,6 +62,10 @@ Claude Code automatically loads skill files from the `.claude/skills` directory 
 - Add lighting and shadows → `threejs-lighting` is loaded
 - Load a GLTF model → `threejs-loaders` is loaded
 - Create custom visual effects → `threejs-shaders` and `threejs-postprocessing` are loaded
+- Make a cinematic particle effect → `threejs-particles-cinematic` is loaded
+- Animate a product reveal or export a video → `threejs-product-motion` is loaded
+
+You can also name a skill explicitly, e.g. "use the threejs-product-motion skill to ...".
 
 ## Usage Examples
 
@@ -75,9 +93,25 @@ Ask Claude Code:
 
 Claude Code will use `threejs-shaders` to generate working GLSL code with proper uniform declarations and coordinate space handling.
 
+### Cinematic Particles
+
+Ask Claude Code:
+
+> "Create 50k glowing particles that swirl with curl noise and then assemble into the shape of my product.glb, with bloom"
+
+Claude Code will use `threejs-particles-cinematic` (GPGPU flow, `MeshSurfaceSampler`, morphing) together with `threejs-postprocessing`.
+
+### Product Commercial
+
+Ask Claude Code:
+
+> "Make an 8-second 9:16 product reveal for product.glb: rise from darkness, orbit camera, light sweep, then let me record it as a video"
+
+Claude Code will use `threejs-product-motion` for studio lighting, auto-framing, the timeline, camera moves, and the `MediaRecorder` export.
+
 ## Skill File Structure
 
-Each skill file follows a consistent format:
+Each skill lives in its own folder, `.claude/skills/<skill-name>/SKILL.md`, and the folder name must match the `name` field. Each skill file follows a consistent format:
 
 ```markdown
 ---
@@ -123,7 +157,7 @@ These skills have been audited against the official Three.js documentation (r160
 Found an error or want to add coverage for additional Three.js features?
 
 1. Fork the repository
-2. Edit or create skill files in `.claude/skills/`
+2. Edit or create skill files in `.claude/skills/<skill-name>/SKILL.md`
 3. Verify against [Three.js documentation](https://threejs.org/docs/)
 4. Submit a pull request
 

@@ -181,8 +181,8 @@ spotLight.shadow.focus = 1;
 Rectangular area light. Great for soft, realistic lighting.
 
 ```javascript
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
-import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
+import { RectAreaLightHelper } from "three/addons/helpers/RectAreaLightHelper.js";
+import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 
 // Must initialize uniforms first
 RectAreaLightUniformsLib.init();
@@ -253,23 +253,50 @@ dirLight.shadow.normalBias = 0.02; // Bias along normal
 
 ### Contact Shadows (Fake, Fast)
 
-```javascript
-import { ContactShadows } from "three/examples/jsm/objects/ContactShadows.js";
+Vanilla Three.js has no `ContactShadows` class (that comes from `@react-three/drei`). Two cheap alternatives:
 
-const contactShadows = new ContactShadows({
-  resolution: 512,
-  blur: 2,
-  opacity: 0.5,
-  scale: 10,
-  position: [0, 0, 0],
-});
-scene.add(contactShadows);
+```javascript
+// 1. Shadow-only ground: invisible plane that only shows received shadows
+const shadowGround = new THREE.Mesh(
+  new THREE.PlaneGeometry(10, 10),
+  new THREE.ShadowMaterial({ opacity: 0.35 }),
+);
+shadowGround.rotation.x = -Math.PI / 2;
+shadowGround.receiveShadow = true;
+scene.add(shadowGround);
+
+// 2. Baked blob shadow: radial gradient texture, no shadow maps at all
+function createBlobShadowTexture(size = 256) {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, "rgba(0,0,0,0.6)");
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  return new THREE.CanvasTexture(canvas);
+}
+
+const blob = new THREE.Mesh(
+  new THREE.PlaneGeometry(2, 2),
+  new THREE.MeshBasicMaterial({
+    map: createBlobShadowTexture(),
+    transparent: true,
+    depthWrite: false,
+  }),
+);
+blob.rotation.x = -Math.PI / 2;
+blob.position.y = 0.001; // avoid z-fighting with the floor
+scene.add(blob);
 ```
+
+For true soft contact shadows, see the official `webgl_shadow_contact` example (render a depth pass from below into a render target, then blur it).
 
 ## Light Helpers
 
 ```javascript
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
+import { RectAreaLightHelper } from "three/addons/helpers/RectAreaLightHelper.js";
 
 // DirectionalLight helper
 const dirHelper = new THREE.DirectionalLightHelper(dirLight, 5);
@@ -300,8 +327,10 @@ spotHelper.update();
 
 Image-Based Lighting using HDR environment maps.
 
+> **Version note:** On r179+ use `HDRLoader` (`three/addons/loaders/HDRLoader.js`) instead of the deprecated `RGBELoader`. The API is the same.
+
 ```javascript
-import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
 const rgbeLoader = new RGBELoader();
 rgbeLoader.load("environment.hdr", (texture) => {
@@ -350,7 +379,7 @@ scene.background = envMap;
 Capture lighting from a point in space for ambient lighting.
 
 ```javascript
-import { LightProbeGenerator } from "three/examples/jsm/lights/LightProbeGenerator.js";
+import { LightProbeGenerator } from "three/addons/lights/LightProbeGenerator.js";
 
 // Generate from cube texture
 const lightProbe = new THREE.LightProbe();
