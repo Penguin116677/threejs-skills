@@ -179,7 +179,7 @@ scripts/qa.mjs               media + temporal + seam QA
 - **`browserType.launch: Executable doesn't exist`:** run `npx playwright install chromium`, or point to an installed Chrome/Chromium with `--chromium /path` or `CHROMIUM_PATH=…`.
 - **WebGL context fails or the page throws in headless mode:** keep the default `--gl swiftshader`, which needs no GPU. Some sandboxes also need `--no-sandbox`; add it to `LAUNCH_ARGS` in `scripts/render.mjs`.
 - **4K is slow:** this is expected with CPU rendering. Use `--workers 2` (or more on bigger machines) or `--gl gpu`. If interrupted, rerun with `--skip-existing`.
-- **Out of memory / context lost at 4K:** use `--workers 1`. Each 4K worker needs roughly 1.5 GB.
+- **Out of memory / context lost at 4K:** use `--workers 1`. Each 4K worker uses about 1 GB of RAM (measured).
 - **`ffmpeg not available` / `Unknown encoder 'libx264'`:** install a full FFmpeg build. The PNG sequence is still complete and can be encoded later with `npm run encode`.
 - **Disk:** the 4K PNG sequence is about 5 GB. Delete `frames/` after encoding if space is tight.
 - **Colours look washed out or shifted in a player:** the file is tagged BT.709 limited range. Use a colour-managed player such as QuickTime, VLC or Resolve, not a browser preview with a mismatched colour space.
