@@ -58,12 +58,14 @@ if (still !== null) {
     '-map', '[pr]', '-an', '-c:v', 'prores_ks', '-profile:v', '3', '-vendor', 'apl0',
     ...color, '-r', String(FPS), path.join(outDir, `${base}${suffix}.mov`),
     '-map', '[h4]', '-an', '-c:v', 'libx264', '-preset', 'slow', '-crf', '12', '-profile:v', 'high',
-    '-tune', 'animation', ...color, '-movflags', '+faststart', '-r', String(FPS),
+    '-tune', 'animation', '-rc-lookahead', '20', ...color, '-movflags', '+faststart', '-r', String(FPS),
     path.join(outDir, `${base}${suffix}.mp4`)];
 }
 if (args.noenc) ffArgs = ['-y', '-v', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${W}x${H}`, '-i', 'pipe:0', '-f', 'null', '-']; // profiling
 const ff = spawn('ffmpeg', ffArgs, { stdio: ['pipe', 'inherit', 'inherit'] });
 const ffDone = new Promise((r) => ff.on('close', r));
+// never leave an orphan encoder holding gigabytes after a failed job
+process.on('exit', (code) => { if (code) ff.kill('SIGKILL'); });
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json' };
 let received = 0;
