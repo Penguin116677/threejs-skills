@@ -1,0 +1,17 @@
+{
+  "name": "adobe-stock-loops",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic headless Three.js renders of six wireframe stock-footage clips (ProRes 422 HQ + H.264).",
+  "scripts": {
+    "render": "node render.mjs",
+    "render:all": "bash render-all.sh",
+    "metadata": "python3 make-metadata.py"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
