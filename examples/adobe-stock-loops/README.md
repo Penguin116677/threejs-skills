@@ -12,6 +12,24 @@ frame by frame in headless Chromium and piped straight into ffmpeg.
 | `E-morph-sphere-loop` | seamless loop | Geodesic wireframe sphere flowing with layered waves, coloured by displacement (violet → pink → cyan). At 10 s it morphs hardest and pulses. |
 | `F-tunnel-warp-loop` | seamless loop | Flight through a curving, twisting tunnel of neon rings with speed streaks. Speed runs from 0.55× at the seam to 1.45× at 10 s (the warp surge), and the FOV widens. |
 
+## Vertical 9:16 versions (1080×1920, rendered natively)
+
+`--res vertical` renders the same worlds with their own camera work and framing, not a crop of the
+horizontal clips. Each vertical clip moves differently from its horizontal version, because Adobe
+rejects near-duplicates:
+
+| Clip | Vertical camera |
+|---|---|
+| A | One full orbit per loop (0.2× speed at the climax) plus a high-to-low crane; the object sits in the upper half |
+| B | Low hero angle looking up at the knot; full counter-orbit per loop |
+| C | Weaves across the road in an S-curve with banking; larger sun in the upper third |
+| D | Crane shot: starts low at the city edge and rises with the towers |
+| E | Tilt orbit from above the sphere to below it, with a lateral sway |
+| F | Continuous barrel roll, one turn per loop, rolling fastest during the warp |
+
+The vertical loops are also verified seamless: frame 600 matches frame 0 to the pixel.
+Their metadata rows add `vertical`, `video`, `9:16`, `portrait` and `social media`.
+
 ## Spec compliance
 
 - **Output**: 1920×1080 and DCI 4K 4096×2160, 600 frames @ 30 fps (20 s), no audio.
@@ -35,7 +53,9 @@ npm install                      # three 0.170.0 + playwright 1.56.1 (uses the s
 node render.mjs --scene A --res 1080p        # → out/A-blueprint-grid-loop-1080p.{mov,mp4}
 node render.mjs --scene A --res 4k           # → out/A-blueprint-grid-loop-4k.{mov,mp4}
 node render.mjs --scene A --still 150        # thumbnail check → out/previews/*.png
-setsid nohup bash render-queue.sh > out/render.log 2>&1 &   # everything, 2 parallel jobs, resumable
+setsid nohup bash render-queue.sh > out/render.log 2>&1 &   # 1080p + 4K, 2 parallel jobs, resumable
+setsid nohup bash render-queue-vertical.sh > out/render-vertical.log 2>&1 &   # 1080x1920, runs after it
+node render.mjs --scene A --res vertical     # → out/A-blueprint-grid-loop-vertical.{mov,mp4}
 python3 make-metadata.py                     # → out/metadata.csv
 ```
 

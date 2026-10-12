@@ -16,7 +16,7 @@ async function run() {
   document.body.appendChild(renderer.domElement);
 
   // px = line-width multiplier so lines keep the same visual weight at 1080p and 4K.
-  const ctx = { W, H, px: H / 1080, aspect: W / H, renderer };
+  const ctx = { W, H, px: Math.min(W, H) / 1080, aspect: W / H, vertical: H > W, renderer };
   const mod = await import(`./scenes/${q.get('scene')}.js`);
   const S = mod.create(ctx);
 

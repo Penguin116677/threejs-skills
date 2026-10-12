@@ -8,7 +8,7 @@ export function create(ctx) {
   const scene = new THREE.Scene();
   scene.background = bg;
   scene.fog = new THREE.Fog(bg, 12, 66);
-  const camera = perspective(ctx, 68, 0.1, 300);
+  const camera = perspective(ctx, ctx.vertical ? 84 : 68, 0.1, 300);
 
   const S = 360;           // distance travelled per loop
   const D = 1.25;          // ring spacing (S / D = 288 rings per loop)
@@ -68,9 +68,11 @@ export function create(ctx) {
     // camera follows the centre line, looking a little ahead
     const [cx, cy] = curve(s), [lx, ly] = curve(s + 9);
     camera.position.set(cx, cy, -s);
-    camera.up.set(Math.sin(0.15 * Math.sin(TAU * p)), Math.cos(0.15 * Math.sin(TAU * p)), 0);
+    // 9:16 version: continuous barrel roll, one turn per loop, rolling fastest during the warp surge
+    const roll = ctx.vertical ? TAU * p - 0.5 * Math.sin(TAU * p) : 0.15 * Math.sin(TAU * p);
+    camera.up.set(Math.sin(roll), Math.cos(roll), 0);
     camera.lookAt(lx, ly, -s - 9);
-    camera.fov = 68 + 10 * glow;
+    camera.fov = (ctx.vertical ? 84 : 68) + 10 * glow;
     camera.updateProjectionMatrix();
 
     const sp = sparks.geometry.attributes.position.array, sa = sparks.geometry.attributes.aAlpha.array;

@@ -9,7 +9,7 @@ export function create(ctx) {
   const scene = new THREE.Scene();
   scene.background = bg;
   scene.fog = new THREE.Fog(bg, 30, 85);
-  const camera = perspective(ctx, 40, 0.1, 400);
+  const camera = perspective(ctx, ctx.vertical ? 58 : 40, 0.1, 400);
   const R = rng(7);
 
   const grid = gridPlane({ color: 0x1b6fa0, majorColor: 0x3fb8ff, intensity: 0.25, majorIntensity: 0.45,
@@ -102,6 +102,13 @@ export function create(ctx) {
     const r = 44 + 12 * easeInOut(u);
     camera.position.set(Math.sin(az) * Math.cos(el) * r, Math.sin(el) * r + 1, Math.cos(az) * Math.cos(el) * r);
     camera.lookAt(0, 3 + 5 * smooth(2, 15, t), 0);
+    if (ctx.vertical) {
+      // 9:16: crane shot — starts low at the city edge and rises with the towers, settling at the end
+      const k = easeInOut(t / 20), va = 0.5 - 0.5 * (1 - Math.pow(1 - t / 20, 2));
+      const vr = 40 - 4 * k;
+      camera.position.set(Math.sin(va) * vr, 12 + 24 * k, Math.cos(va) * vr);
+      camera.lookAt(0, 5 + 5 * k, 0);
+    }
     grid.material.uniforms.uCam.value.copy(camera.position);
   }
   return { scene, camera, update, bloom: { strength: 0.5, radius: 0.35, threshold: 0.2 } };

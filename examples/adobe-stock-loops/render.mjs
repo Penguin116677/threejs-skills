@@ -28,7 +28,7 @@ const SCENES = {
   E: 'E-morph-sphere-loop',
   F: 'F-tunnel-warp-loop',
 };
-const RES = { '1080p': [1920, 1080], '4k': [4096, 2160] };
+const RES = { '1080p': [1920, 1080], '4k': [4096, 2160], vertical: [1080, 1920] };
 
 const scene = String(args.scene || 'A').toUpperCase();
 const res = String(args.res || '1080p');

@@ -8,7 +8,7 @@ export function create(ctx) {
   const scene = new THREE.Scene();
   scene.background = bg;
   scene.fog = new THREE.Fog(bg, 14, 42);
-  const camera = perspective(ctx, 38);
+  const camera = perspective(ctx, ctx.vertical ? 52 : 38);
 
   const grid = gridPlane({ color: 0x4aa8ff, majorColor: 0x9fe3ff, intensity: 0.32, majorIntensity: 0.55,
     cell: 1, major: 5, width: 1.4, majorWidth: 2.2, fadeNear: 8, fadeFar: 34, waveColor: 0x7fe8ff });
@@ -118,6 +118,12 @@ export function create(ctx) {
     const r = 11.5 - 1.0 * glow;
     camera.position.set(Math.sin(az) * Math.cos(el) * r, 2.6 + Math.sin(el) * r, Math.cos(az) * Math.cos(el) * r);
     camera.lookAt(0, 2.4, 0);
+    if (ctx.vertical) {
+      // 9:16: one full orbit per loop (0.2x speed at the climax) with a crane from high to low
+      const va = TAU * p + 0.8 * Math.sin(TAU * p), ve = 0.42 + 0.22 * Math.cos(TAU * p), vr = 13.5 - 1.2 * glow;
+      camera.position.set(Math.sin(va) * Math.cos(ve) * vr, 2.6 + Math.sin(ve) * vr, Math.cos(va) * Math.cos(ve) * vr);
+      camera.lookAt(0, 2.2, 0);
+    }
     grid.material.uniforms.uCam.value.copy(camera.position);
   }
   return { scene, camera, update, bloom: { strength: 0.55, radius: 0.35, threshold: 0.15 } };

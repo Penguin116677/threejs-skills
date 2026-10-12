@@ -15,7 +15,7 @@ export function create(ctx) {
   const scene = new THREE.Scene();
   scene.background = bg;
   scene.fog = new THREE.Fog(bg, 12, 34);
-  const camera = perspective(ctx, 36);
+  const camera = perspective(ctx, ctx.vertical ? 50 : 36);
   const cyan = new THREE.Color(0x35f2ff);
 
   const holo = new THREE.Group();
@@ -135,6 +135,12 @@ export function create(ctx) {
     const r = 12.5 - 1.2 * glow;
     camera.position.set(Math.sin(az) * r, 3.6 + 0.6 * Math.cos(TAU * p), Math.cos(az) * r);
     camera.lookAt(0, 2.8, 0);
+    if (ctx.vertical) {
+      // 9:16: low hero angle, full counter-orbit per loop, easing to 0.4x at the climax
+      const va = -(TAU * p + 0.6 * Math.sin(TAU * p)), vr = 11.5 - 1.2 * glow;
+      camera.position.set(Math.sin(va) * vr, 1.0 + 0.7 * Math.cos(TAU * p), Math.cos(va) * vr);
+      camera.lookAt(0, 3.0, 0);
+    }
     floor.material.uniforms.uCam.value.copy(camera.position);
   }
   return { scene, camera, update, bloom: { strength: 0.7, radius: 0.4, threshold: 0.12 } };

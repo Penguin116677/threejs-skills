@@ -8,7 +8,7 @@ export function create(ctx) {
   const horizon = new THREE.Color(0x2a0838);
   scene.background = new THREE.Color(0x07010f);
   scene.fog = new THREE.Fog(horizon, 30, 120);
-  const camera = perspective(ctx, 55, 0.1, 600);
+  const camera = perspective(ctx, ctx.vertical ? 78 : 55, 0.1, 600);
 
   // Sky gradient dome
   const skyMat = new THREE.ShaderMaterial({
@@ -46,6 +46,7 @@ export function create(ctx) {
   });
   const sun = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), sunMat);
   sun.position.set(0, 11, -300);
+  if (ctx.vertical) sun.scale.setScalar(1.45);
   scene.add(sun);
   const halo = softPoints(ctx, 1, { size: 900, color: 0xff3c8c, atten: 0 });
   halo.position.copy(sun.position).add(new THREE.Vector3(0, 0, 5));
@@ -164,6 +165,13 @@ export function create(ctx) {
     camera.position.set(0.6 * Math.sin(TAU * p), 2.4 + 0.25 * Math.sin(TAU * 2 * p), 6);
     camera.lookAt(0.4 * Math.sin(TAU * p + 0.6), 4.2, -60);
     camera.rotateZ(0.025 * Math.sin(TAU * p));
+    if (ctx.vertical) {
+      // 9:16: weave across the road (one S-curve per loop), banking into each turn
+      const vx = 3.2 * Math.sin(TAU * p);
+      camera.position.set(vx, 3.0 + 0.4 * Math.sin(TAU * 2 * p), 6);
+      camera.lookAt(vx * 0.35, 6.5, -60);
+      camera.rotateZ(-0.09 * Math.cos(TAU * p));
+    }
   }
   return { scene, camera, update, bloom: { strength: 0.6, radius: 0.45, threshold: 0.2 } };
 }

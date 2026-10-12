@@ -56,14 +56,29 @@ def keywords(base):
     return out
 
 
+VERTICAL_TITLES = {
+    "A-blueprint-grid-loop": "Vertical cyan wireframe icosahedron orbit over blueprint grid, loop",
+    "B-hologram-knot-loop": "Vertical holographic torus knot on projector, low orbit, seamless loop",
+    "C-synthwave-horizon-loop": "Vertical synthwave neon grid road weaving toward retro sun, loop",
+    "D-wireframe-city-buildup": "Vertical wireframe city growing, crane shot rising with towers",
+    "E-morph-sphere-loop": "Vertical morphing wireframe sphere, pink and cyan, seamless loop",
+    "F-tunnel-warp-loop": "Vertical neon wireframe tunnel with barrel roll warp, seamless loop",
+}
+
 rows = []
-for res in ("1080p", "4k"):
+for res in ("1080p", "4k", "vertical"):
     for stem, c in CLIPS.items():
         kw = keywords(c["kw"])
-        if res == "1080p":
+        title = c["title"]
+        if res != "4k":
             kw = [k for k in kw if k != "4k"] + ["full hd"]
-        assert len(c["title"]) <= 70, c["title"]
-        rows.append([f"{stem}-{res}.mov", c["title"], ", ".join(kw), c["category"]])
+        if res == "vertical":
+            # vertical/video near the front so they count among the important keywords
+            kw = kw[:8] + ["vertical", "video"] + kw[8:] + ["9:16", "portrait", "social media"]
+            title = VERTICAL_TITLES[stem]
+        assert 30 <= len(kw) <= 49, len(kw)
+        assert len(title) <= 70, title
+        rows.append([f"{stem}-{res}.mov", title, ", ".join(kw), c["category"]])
 
 out = pathlib.Path(__file__).parent / "out" / "metadata.csv"
 out.parent.mkdir(exist_ok=True)

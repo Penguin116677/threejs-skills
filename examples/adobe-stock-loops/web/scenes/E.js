@@ -7,7 +7,7 @@ import { TAU, pulse, lines, setLinePositions, perspective, softPoints } from '..
 export function create(ctx) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x040209);
-  const camera = perspective(ctx, 34);
+  const camera = perspective(ctx, ctx.vertical ? 46 : 34);
 
   // radial backdrop glow
   const bgMat = new THREE.ShaderMaterial({ depthWrite: false, uniforms: { uGlow: { value: 0 } },
@@ -98,6 +98,12 @@ export function create(ctx) {
     const r = 5.6 - 0.4 * glow;
     camera.position.set(Math.sin(az) * r, 0.4 + 0.45 * Math.cos(TAU * p), Math.cos(az) * r);
     camera.lookAt(0, 0, 0);
+    if (ctx.vertical) {
+      // 9:16: tilt orbit from above to below the sphere (still at the climax), slight lateral sway
+      const ve = 0.55 * Math.cos(TAU * p), va = 0.25 * Math.sin(TAU * 2 * p), vr = 5.8 - 0.35 * glow;
+      camera.position.set(Math.sin(va) * Math.cos(ve) * vr, Math.sin(ve) * vr, Math.cos(va) * Math.cos(ve) * vr);
+      camera.lookAt(0, 0, 0);
+    }
   }
   return { scene, camera, update, bloom: { strength: 0.5, radius: 0.4, threshold: 0.2 } };
 }
