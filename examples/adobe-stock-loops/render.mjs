@@ -83,6 +83,7 @@ const server = http.createServer((req, res2) => {
       const reply = () => { res2.end('ok'); };
       ok ? reply() : ff.stdin.once('drain', reply);
       received++;
+      lastFrame = Date.now();
       if (received % 30 === 0 || received === count) {
         const el = (Date.now() - t0) / 1000;
         process.stderr.write(`\r[${scene} ${res}] ${received}/${count}  ${(el / received).toFixed(2)}s/f  `);
@@ -111,6 +112,12 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
 page.on('console', (m) => console.error('[page]', m.text()));
 page.on('pageerror', (e) => { console.error('\nPAGE EXCEPTION', e); process.exit(1); });
+page.on('crash', () => { console.error('\nPAGE CRASHED'); process.exit(1); });
+// Watchdog: a hung renderer stops sending frames without any error, so fail loudly instead of waiting forever.
+let lastFrame = Date.now();
+setInterval(() => {
+  if (Date.now() - lastFrame > 180000) { console.error(`\nSTALLED after ${received} frames`); process.exit(1); }
+}, 10000).unref();
 await page.goto(`http://127.0.0.1:${port}/web/index.html?scene=${scene}&w=${W}&h=${H}&start=${start}&count=${count}${args.nobloom ? "&nobloom=1" : ""}`);
 await allDone;
 ff.stdin.end();
