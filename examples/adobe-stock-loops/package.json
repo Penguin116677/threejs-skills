@@ -9,7 +9,8 @@
     "metadata": "python3 make-metadata.py"
   },
   "dependencies": {
-    "three": "0.170.0"
+    "three": "0.170.0",
+    "ws": "8.18.0"
   },
   "devDependencies": {
     "playwright": "1.56.1"

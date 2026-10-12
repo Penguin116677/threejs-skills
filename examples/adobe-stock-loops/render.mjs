@@ -7,10 +7,12 @@
 //   node render.mjs --scene A --res 1080p --frames 60 --start 0   partial test render
 import http from 'node:http';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { WebSocketServer } from 'ws';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const args = Object.fromEntries(
@@ -69,31 +71,13 @@ process.on('exit', (code) => { if (code) ff.kill('SIGKILL'); });
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json' };
 let received = 0;
+let lastFrame = Date.now();
 let finish;
 const allDone = new Promise((r) => (finish = r));
 const t0 = Date.now();
 
 const server = http.createServer((req, res2) => {
   const url = new URL(req.url, 'http://x');
-  if (req.method === 'POST' && url.pathname === '/frame') {
-    const chunks = [];
-    req.on('data', (c) => chunks.push(c));
-    req.on('end', () => {
-      const buf = Buffer.concat(chunks);
-      if (buf.length !== W * H * 4) throw new Error(`bad frame size ${buf.length}`);
-      const ok = ff.stdin.write(buf);
-      const reply = () => { res2.end('ok'); };
-      ok ? reply() : ff.stdin.once('drain', reply);
-      received++;
-      lastFrame = Date.now();
-      if (received % 30 === 0 || received === count) {
-        const el = (Date.now() - t0) / 1000;
-        process.stderr.write(`\r[${scene} ${res}] ${received}/${count}  ${(el / received).toFixed(2)}s/f  `);
-      }
-      if (received === count) finish();
-    });
-    return;
-  }
   if (req.method === 'POST' && url.pathname === '/error') {
     let b = ''; req.on('data', (c) => (b += c)); req.on('end', () => { console.error('\nPAGE ERROR:', b); process.exit(1); });
     return;
@@ -104,26 +88,44 @@ const server = http.createServer((req, res2) => {
   res2.setHeader('Content-Type', MIME[path.extname(file)] || 'application/octet-stream');
   fs.createReadStream(file).pipe(res2);
 });
+// Frames arrive as binary WebSocket messages, each acknowledged so the page renders one ahead at most.
+// (fetch() POST bodies of this size are not released by Chromium and leak ~1 frame per frame.)
+const wss = new WebSocketServer({ server, maxPayload: W * H * 4 + 1024 });
+wss.on('connection', (sock) => sock.on('message', (buf) => {
+  if (buf.length !== W * H * 4) { console.error(`\nbad frame size ${buf.length}`); process.exit(1); }
+  const ack = () => sock.send('ok');
+  ff.stdin.write(buf) ? ack() : ff.stdin.once('drain', ack);
+  received++;
+  lastFrame = Date.now();
+  if (received % 30 === 0 || received === count) {
+    const el = (Date.now() - t0) / 1000;
+    process.stderr.write(`\r[${scene} ${res}] ${received}/${count}  ${(el / received).toFixed(2)}s/f  `);
+  }
+  if (received === count) finish();
+}));
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const port = server.address().port;
 
-const browser = await chromium.launch({
-  args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist',
-    '--disable-gpu-sandbox', '--js-flags=--max-old-space-size=8192'],
-});
-const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
-page.on('console', (m) => console.error('[page]', m.text()));
-page.on('pageerror', (e) => { console.error('\nPAGE EXCEPTION', e); process.exit(1); });
-page.on('crash', () => { console.error('\nPAGE CRASHED'); process.exit(1); });
+// Chromium is launched directly, without Playwright/CDP: with DevTools attached, the renderer keeps
+// every POSTed frame body for the Network inspector and grows by gigabytes until it is OOM-killed.
+const CHROME = process.env.CHROME || chromium.executablePath()
+  .replace(/chromium-(\d+)\/chrome-linux\/chrome$/, 'chromium_headless_shell-$1/chrome-linux/headless_shell');
+const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'stock-render-'));
+const url = `http://127.0.0.1:${port}/web/index.html?scene=${scene}&w=${W}&h=${H}&start=${start}&count=${count}${args.nobloom ? '&nobloom=1' : ''}`;
+const chrome = spawn(CHROME, ['--headless', '--no-sandbox', '--no-first-run', `--user-data-dir=${profile}`,
+  '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist',
+  '--disable-gpu-sandbox', '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
+  '--js-flags=--max-old-space-size=4096', '--window-size=800,600', url], { stdio: ['ignore', 'ignore', 'pipe'] });
+chrome.stderr.on('data', (d) => { if (/crash|out of memory|FATAL/i.test(d)) console.error('[chrome]', String(d).trim()); });
+chrome.on('exit', (code, sig) => { if (received < count) { console.error(`\nPAGE CRASHED (chrome exited ${code ?? sig})`); process.exit(1); } });
+process.on('exit', () => { chrome.kill('SIGKILL'); fs.rmSync(profile, { recursive: true, force: true }); });
 // Watchdog: a hung renderer stops sending frames without any error, so fail loudly instead of waiting forever.
-let lastFrame = Date.now();
 setInterval(() => {
   if (Date.now() - lastFrame > 180000) { console.error(`\nSTALLED after ${received} frames`); process.exit(1); }
 }, 10000).unref();
-await page.goto(`http://127.0.0.1:${port}/web/index.html?scene=${scene}&w=${W}&h=${H}&start=${start}&count=${count}${args.nobloom ? "&nobloom=1" : ""}`);
 await allDone;
 ff.stdin.end();
 await ffDone;
-await browser.close();
+chrome.kill();
 server.close();
 console.error(`\ndone ${base} in ${((Date.now() - t0) / 60000).toFixed(1)} min`);

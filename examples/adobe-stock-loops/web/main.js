@@ -38,13 +38,19 @@ async function run() {
 
   const gl = renderer.getContext();
   const buf = new Uint8Array(W * H * 4);
+  const ws = new WebSocket(`ws://${location.host}/`);
+  ws.binaryType = 'arraybuffer';
+  await new Promise((ok, fail) => { ws.onopen = ok; ws.onerror = fail; });
+  let acked = () => {};
+  ws.onmessage = () => acked();
   for (let i = start; i < start + count; i++) {
     const t = i / FPS;
     S.update(t, (t % LOOP) / LOOP, bloom);
     composer.render();
     gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, buf);
-    const r = await fetch('/frame?i=' + i, { method: 'POST', body: buf });
-    await r.text();
+    const ack = new Promise((r) => (acked = r));
+    ws.send(buf);
+    await ack;
   }
 }
 run().catch((e) => fetch('/error', { method: 'POST', body: String(e && e.stack || e) }));
