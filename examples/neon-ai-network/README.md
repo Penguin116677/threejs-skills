@@ -80,7 +80,7 @@ node scripts/render.mjs --list 0,225,449,450 --no-encode
 
 How it works: `render.mjs` starts a small local server (`scripts/server.mjs`) and opens `render.html` in headless Chromium at the exact output resolution. For each frame it calls `window.neonRender.frame(i)`, which renders `t = i / fps` and POSTs a lossless PNG back to the server. It never screen-records. When all frames exist, `encode.mjs` runs FFmpeg.
 
-Measured on this 4-vCPU cloud container (SwiftShader, no GPU): **~0.8 s/frame at 1080p** and **~3.5 s/frame at 4K** with 2 workers. That is about 6 minutes for 1080p and 25–30 minutes for 4K.
+Measured on a 4-vCPU cloud container (SwiftShader, no GPU, `--workers 2`): **~0.7 s/frame at 1080p** (≈ 5.5 min for 451 frames) and **~1.9 s/frame at 4K** (≈ 15 min). Long 4K runs reload each page every 40 frames, because Chromium otherwise exhausts its blob store (`ERR_BLOB_OUT_OF_MEMORY`). A failed frame is retried automatically.
 
 ### Encoding (PNG sequence → MP4)
 

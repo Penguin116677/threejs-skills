@@ -53,6 +53,7 @@ function chromiumPath() {
 // Output is visually equivalent; pixel-exact determinism is guaranteed only
 // within one backend/driver, so render a whole sequence with one setting.
 const GL = get('--gl', 'swiftshader');
+const RECYCLE_EVERY = 40; // frames per page load
 const LAUNCH_ARGS = [
   ...(GL === 'gpu' ? ['--use-angle=default', '--enable-gpu'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader']),
   '--ignore-gpu-blocklist',
@@ -89,12 +90,34 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
     page.on('console', (m) => m.type() === 'error' && console.error(`[page ${w}] ${m.text()}`));
     page.on('pageerror', (e) => console.error(`[page ${w}] ${e.message}`));
-    await page.goto(url);
-    await page.waitForFunction(() => window.neonReady === true, null, { timeout: 120000 });
+    const load = async () => {
+      await page.goto(url);
+      await page.waitForFunction(() => window.neonReady === true, null, { timeout: 120000 });
+    };
+    await load();
     if (w === 0) console.log('network:', JSON.stringify(await page.evaluate(() => window.neonRender.stats)));
+    let sinceLoad = 0;
     for (let k = w; k < todo.length; k += workers) {
       const i = todo[k];
-      await page.evaluate((idx) => window.neonRender.frame(idx), i);
+      // Chromium frees PNG blobs lazily; at 4K the blob store can fill up
+      // (ERR_BLOB_OUT_OF_MEMORY). Reload the page periodically and retry on
+      // failure — safe because every frame is a pure function of its index.
+      if (sinceLoad >= RECYCLE_EVERY) {
+        await load();
+        sinceLoad = 0;
+      }
+      for (let attempt = 1; ; attempt++) {
+        try {
+          await page.evaluate((idx) => window.neonRender.frame(idx), i);
+          break;
+        } catch (err) {
+          if (attempt >= 3) throw err;
+          console.warn(`[worker ${w}] frame ${i} failed (${err.message.split('\n')[0]}); reloading and retrying`);
+          await load();
+          sinceLoad = 0;
+        }
+      }
+      sinceLoad++;
       done++;
       if (done % 10 === 0 || done === todo.length) {
         const el = (Date.now() - t0) / 1000;
