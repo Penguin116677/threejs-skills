@@ -53,8 +53,7 @@ npm install                      # three 0.170.0 + playwright 1.56.1 (uses the s
 node render.mjs --scene A --res 1080p        # → out/A-blueprint-grid-loop-1080p.{mov,mp4}
 node render.mjs --scene A --res 4k           # → out/A-blueprint-grid-loop-4k.{mov,mp4}
 node render.mjs --scene A --still 150        # thumbnail check → out/previews/*.png
-setsid nohup bash render-queue.sh > out/render.log 2>&1 &   # 1080p + 4K, 2 parallel jobs, resumable
-setsid nohup bash render-queue-vertical.sh > out/render-vertical.log 2>&1 &   # 1080x1920, runs after it
+setsid nohup bash render-queue.sh > out/render.log 2>&1 &   # 1080p, vertical, then 4K (serial); resumable via out/*.done
 node render.mjs --scene A --res vertical     # → out/A-blueprint-grid-loop-vertical.{mov,mp4}
 python3 make-metadata.py                     # → out/metadata.csv
 ```
