@@ -75,6 +75,12 @@ Ask Claude Code:
 
 Claude Code will use `threejs-shaders` to generate working GLSL code with proper uniform declarations and coordinate space handling.
 
+## Examples
+
+| Example | Description |
+| ------- | ----------- |
+| [**neon-ai-network**](examples/neon-ai-network/) | Deterministic 15 s neon network loop (instanced GLSL ribbons, bloom, seamless loop) with an interactive preview and a headless renderer that outputs native 4K PNG sequences and H.264 MP4 |
+
 ## Skill File Structure
 
 Each skill file follows a consistent format:

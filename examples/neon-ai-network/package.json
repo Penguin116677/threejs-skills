@@ -1,0 +1,21 @@
+{
+  "name": "neon-ai-network",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Neon AI Network — Glowing Digital Connections. Deterministic Three.js motion background with native-resolution frame renderer.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "preview": "node scripts/server.mjs",
+    "render": "node scripts/render.mjs",
+    "render:preview": "node scripts/render.mjs --width 1920 --height 1080 --out renders/neon-ai-network_1080p_preview.mp4 --frames-dir frames/1080p",
+    "encode": "node scripts/encode.mjs",
+    "qa": "node scripts/qa.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neon AI Network — Preview</title>
+  <link rel="stylesheet" href="./src/preview.css" />
+  <script type="importmap">
+    { "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+  </script>
+</head>
+<body>
+  <main id="stage">
+    <div id="frame">
+      <canvas id="c"></canvas>
+      <div id="guides" hidden>
+        <div class="copy-zone"><span>copy space</span></div>
+        <div class="title-safe"></div>
+      </div>
+    </div>
+  </main>
+
+  <aside id="panel">
+    <header>
+      <h1>Neon AI Network</h1>
+      <p class="sub">Preview — rendering is driven by a fixed virtual timeline; these controls never affect final render timing.</p>
+    </header>
+
+    <section class="transport">
+      <button id="play" title="Play / pause (space)">Pause</button>
+      <button id="prev" title="Previous frame (←)">◀︎</button>
+      <button id="next" title="Next frame (→)">▶︎</button>
+      <select id="speed" title="Preview speed">
+        <option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option>
+      </select>
+    </section>
+    <input id="scrub" type="range" min="0" max="449" step="1" value="0" />
+    <div class="readout"><span id="tc">00:00:00</span><span id="fr">frame 0 / 450</span><span id="fps">— fps</span></div>
+
+    <section class="controls">
+      <label>Preview size
+        <select id="quality">
+          <option value="0.5">960×540</option><option value="0.75">1440×810</option><option value="1" selected>1920×1080</option>
+        </select>
+      </label>
+      <label><input id="showGuides" type="checkbox" /> Show copy-space / title-safe guides</label>
+      <label>Glow <input data-key="glow" type="range" min="0.3" max="2" step="0.05" /></label>
+      <label>Bloom <input data-key="bloom" type="range" min="0" max="1.5" step="0.05" /></label>
+      <label>Bloom radius <input data-key="bloomRadius" type="range" min="0" max="1" step="0.05" /></label>
+      <label>Exposure <input data-key="exposure" type="range" min="0.5" max="1.8" step="0.05" /></label>
+      <label>Camera motion <input data-key="camera" type="range" min="0" max="1.5" step="0.05" /></label>
+      <label>Depth of field <input data-key="dof" type="range" min="0" max="2" step="0.05" /></label>
+      <label>Copy-space darkening <input data-key="copySpace" type="range" min="0" max="0.9" step="0.05" /></label>
+      <label>Density <span class="hint">(rebuild)</span> <input data-key="density" data-rebuild type="range" min="0.4" max="2" step="0.1" /></label>
+      <label>Seed <span class="hint">(rebuild)</span> <input data-key="seed" data-rebuild type="number" step="1" /></label>
+      <div class="colors">
+        <label>Cyan <input data-color="cyan" type="color" /></label>
+        <label>Violet <input data-color="violet" type="color" /></label>
+        <label>Magenta <input data-color="magenta" type="color" /></label>
+        <label>Navy <input data-color="navy" type="color" /></label>
+      </div>
+    </section>
+
+    <section class="export">
+      <button id="copyCmd">Copy 4K render command</button>
+      <button id="reset">Reset look</button>
+      <code id="cmd"></code>
+    </section>
+    <p class="stats" id="stats"></p>
+  </aside>
+  <script type="module" src="./src/preview.js"></script>
+</body>
+</html>
