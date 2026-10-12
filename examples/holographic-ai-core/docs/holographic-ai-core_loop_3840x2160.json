@@ -1,0 +1,91 @@
+{
+  "frames": "output/holographic-ai-core_loop_3840x2160/frames",
+  "video": "output/video/holographic-ai-core_loop_3840x2160_h264.mp4",
+  "pass": true,
+  "results": [
+    {
+      "check": "sequence.count",
+      "pass": true,
+      "detail": "480/480 frames, missing=[]"
+    },
+    {
+      "check": "sequence.size",
+      "pass": true,
+      "detail": "sizes=[(3840, 2160)] expected=3840x2160"
+    },
+    {
+      "check": "motion.no_duplicates",
+      "pass": true,
+      "detail": "min step=0.6211 median=0.7564 duplicates at []"
+    },
+    {
+      "check": "motion.no_jumps",
+      "pass": true,
+      "detail": "max step=1.7297 (limit 3.2755) jumps at []"
+    },
+    {
+      "check": "exposure.stable",
+      "pass": true,
+      "detail": "mean luma 9.83..16.77, max frame-to-frame change 0.462 (8-bit levels)"
+    },
+    {
+      "check": "clipping.highlights",
+      "pass": true,
+      "detail": "max share of pure-white pixels 0.000% (limit 0.3%)"
+    },
+    {
+      "check": "contrast.negative_space",
+      "pass": true,
+      "detail": "89.6% of frame below luma 25 (dark negative space)"
+    },
+    {
+      "check": "framing.safe_area",
+      "pass": true,
+      "detail": "union of bright content box x[0.402,0.917] y[0.107,0.874] (must lie within 0.05..0.95)"
+    },
+    {
+      "check": "framing.copy_space",
+      "pass": true,
+      "detail": "left third: 99.9th-percentile luma max 4.7 (limit 48, keeps copy area clean)"
+    },
+    {
+      "check": "loop.seam_step",
+      "pass": true,
+      "detail": "last->first step 0.8052 vs median 0.7564 / max 1.7297"
+    },
+    {
+      "check": "loop.state_periodic",
+      "pass": true,
+      "detail": "frame 480 (t=T) vs frame 0: max abs pixel difference 0"
+    },
+    {
+      "check": "handoff.story_to_loop",
+      "pass": true,
+      "detail": "story last -> loop first step 0.8052 vs loop median 0.7564 / max 1.7297"
+    },
+    {
+      "check": "handoff.state_identical",
+      "pass": true,
+      "detail": "story frame 480 vs loop frame 0: max abs pixel difference 0"
+    },
+    {
+      "check": "video.metadata",
+      "pass": true,
+      "detail": "{\"codec\": \"h264\", \"profile\": \"High\", \"size\": \"3840x2160\", \"fps\": 30.0, \"frames\": 480, \"duration\": 16.0, \"pix_fmt\": \"yuv420p\", \"field_order\": \"progressive\", \"bitrate_mbps\": 45.5, \"audio_streams\": 0, \"size_mb\": 91.1, \"color\": \"bt709/bt709/bt709\"}"
+    },
+    {
+      "check": "video.decoded_continuity",
+      "pass": true,
+      "detail": "decoded 480 frames, min step 0.6206, duplicates at []"
+    },
+    {
+      "check": "video.frame_order",
+      "pass": true,
+      "detail": "(frame, err vs own PNG, err vs neighbour PNG): [(0, 0.319, 1.049), (120, 0.294, 0.918), (240, 0.302, 0.991), (360, 0.306, 1.312), (479, 0.324, 1.059)]"
+    }
+  ],
+  "motion": {
+    "median_step": 0.7563822269439697,
+    "max_step": 1.7296825647354126
+  }
+}

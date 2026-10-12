@@ -91,10 +91,25 @@ quantisation tuned for dark gradients (`aq-mode=3`), a 1-second GOP (keyframe ev
 use CRF 18.
 
 **Render cost (measured in this environment):** headless Chromium with SwiftShader
-(CPU WebGL, 4 cores). It took about 10 s per 4K frame per worker, or about 3.4 s
-per frame with 3 parallel workers, so roughly 27 min per 16 s cut. A machine with a
-GPU-backed browser will be far faster, and the exporter is the same either way. On
-a GPU machine you can drop the SwiftShader flags in `render.mjs`.
+(CPU WebGL, 4 cores) took about 10 s per 4K frame per worker, or 3.6–3.9 s per frame
+with 3 parallel workers. That is about 30 min per 16 s cut. A machine with a
+GPU-backed browser will be far faster, and the exporter is the same either way. On a
+GPU machine you can drop the SwiftShader flags in `render.mjs`.
+
+### Reference render (default preset, seed 7)
+
+| Cut | Size | Codec | Frames / fps / duration | Bitrate | File |
+| --- | --- | --- | --- | --- | --- |
+| Loop | 3840×2160 native | H.264 High@5.1, yuv420p, BT.709 | 480 / 30 / 16.0 s | 45.5 Mb/s | 91.1 MB |
+| Story | 3840×2160 native | H.264 High@5.1, yuv420p, BT.709 | 480 / 30 / 16.0 s | 39.8 Mb/s | 79.6 MB |
+
+Both cuts are progressive with no audio stream, and every `qc.py` check passed. The
+loop's frame 480 and the story's frame 480 are both pixel-identical to loop frame 0.
+The JSON reports and contact sheets are in [`docs/`](docs).
+
+![Loop contact sheet](docs/loop-contact-sheet.jpg)
+
+Video files are not committed. Regenerate them with `npm run build:4k`.
 
 ## Project structure
 

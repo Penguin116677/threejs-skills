@@ -160,7 +160,8 @@ export function createParticles(THREE, shared, cfg, rng) {
     const col = pickColor().multiplyScalar(1.6 + 1.4 * Math.exp(-trail * 8));
     // the first handful of motes appear alone in the dark (Scene 1)
     const pioneer = n < 18;
-    const delay = pioneer ? 0.05 + n * 0.07 : 0.9 + 3.2 * rng.next() + (n % orbitBases.length) * 0.25;
+    // pioneers are already emerging on frame 0, so the opening has motion from the first frame
+    const delay = pioneer ? -0.5 + n * 0.08 : 0.9 + 3.2 * rng.next() + (n % orbitBases.length) * 0.25;
     if (pioneer) col.copy(cyan).lerp(ice, 0.3).multiplyScalar(5.0);
     const size = pioneer ? 0.032 : rng.range(0.009, 0.019);
     write(ob.a, ob.b, [r, theta0, ob.o.turns, 0], [size, rng.range(0, 0.02), rng.range(0, 6.28), delay], col);

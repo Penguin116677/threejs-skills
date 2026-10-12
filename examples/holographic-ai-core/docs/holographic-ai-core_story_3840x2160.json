@@ -1,0 +1,71 @@
+{
+  "frames": "output/holographic-ai-core_story_3840x2160/frames",
+  "video": "output/video/holographic-ai-core_story_3840x2160_h264.mp4",
+  "pass": true,
+  "results": [
+    {
+      "check": "sequence.count",
+      "pass": true,
+      "detail": "480/480 frames, missing=[]"
+    },
+    {
+      "check": "sequence.size",
+      "pass": true,
+      "detail": "sizes=[(3840, 2160)] expected=3840x2160"
+    },
+    {
+      "check": "motion.no_duplicates",
+      "pass": true,
+      "detail": "min step=0.0126 median=0.7398 duplicates at []"
+    },
+    {
+      "check": "motion.no_jumps",
+      "pass": true,
+      "detail": "max step=1.7246 (limit 3.2094) jumps at []"
+    },
+    {
+      "check": "exposure.stable",
+      "pass": true,
+      "detail": "mean luma 0.45..16.28, max frame-to-frame change 0.416 (8-bit levels)"
+    },
+    {
+      "check": "clipping.highlights",
+      "pass": true,
+      "detail": "max share of pure-white pixels 0.000% (limit 0.3%)"
+    },
+    {
+      "check": "contrast.negative_space",
+      "pass": true,
+      "detail": "93.1% of frame below luma 25 (dark negative space)"
+    },
+    {
+      "check": "framing.safe_area",
+      "pass": true,
+      "detail": "union of bright content box x[0.402,0.894] y[0.144,0.870] (must lie within 0.05..0.95)"
+    },
+    {
+      "check": "framing.copy_space",
+      "pass": true,
+      "detail": "left third: 99.9th-percentile luma max 5.2 (limit 48, keeps copy area clean)"
+    },
+    {
+      "check": "video.metadata",
+      "pass": true,
+      "detail": "{\"codec\": \"h264\", \"profile\": \"High\", \"size\": \"3840x2160\", \"fps\": 30.0, \"frames\": 480, \"duration\": 16.0, \"pix_fmt\": \"yuv420p\", \"field_order\": \"progressive\", \"bitrate_mbps\": 39.8, \"audio_streams\": 0, \"size_mb\": 79.6, \"color\": \"bt709/bt709/bt709\"}"
+    },
+    {
+      "check": "video.decoded_continuity",
+      "pass": true,
+      "detail": "decoded 480 frames, min step 0.0090, duplicates at []"
+    },
+    {
+      "check": "video.frame_order",
+      "pass": true,
+      "detail": "(frame, err vs own PNG, err vs neighbour PNG): [(49, 0.262, 0.338), (120, 0.267, 0.902), (240, 0.287, 0.92), (360, 0.305, 1.285), (479, 0.324, 1.059)]"
+    }
+  ],
+  "motion": {
+    "median_step": 0.7398458123207092,
+    "max_step": 1.7246123552322388
+  }
+}

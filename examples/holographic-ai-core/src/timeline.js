@@ -88,7 +88,8 @@ export function computeState(t, cfg) {
   // ---------------------------------------------------------------- builds
   const b = (a, z) => (story ? smootherstep(a, z, tc) : 1);
   const build = {
-    background: story ? 0.25 + 0.75 * smoothstep(0, 6, tc) : 1,
+    // ease-out (non-zero velocity at t=0) so the opening is never static
+    background: story ? 0.25 + 0.75 * (1 - Math.pow(1 - clamp01(tc / 6), 2)) : 1,
     dust: b(0.2, 4.5),
     orbits: ORBIT_LAYOUT.map((_, i) => b(0.6 + 0.3 * i, 2.8 + 0.3 * i)),
     sphere: b(3.0, 5.0),
