@@ -1,0 +1,22 @@
+{
+  "name": "holographic-ai-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Holographic AI Core: procedural Three.js motion graphics with a deterministic frame-accurate video export pipeline.",
+  "type": "module",
+  "scripts": {
+    "preview": "node scripts/serve.mjs",
+    "render": "node scripts/render.mjs",
+    "encode": "node scripts/encode.mjs",
+    "qc": "python3 scripts/qc.py",
+    "build:preview": "WIDTH=1280 HEIGHT=720 bash scripts/build-all.sh",
+    "build:4k": "bash scripts/build-all.sh"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  },
+  "license": "MIT"
+}

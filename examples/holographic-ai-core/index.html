@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Holographic AI Core</title>
+  <style>
+    :root { --bg: #01030a; --fg: #cfe6ff; --dim: #6f87a8; --line: #1b2a44; --accent: #2fd8ff; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, sans-serif; }
+    #stage { position: absolute; inset: 0 0 64px 0; display: grid; place-items: center; }
+    #frame { position: relative; aspect-ratio: 16 / 9; width: min(100vw, calc((100vh - 64px) * 16 / 9)); }
+    canvas { width: 100%; height: 100%; display: block; }
+    #guides { position: absolute; inset: 0; pointer-events: none; display: none; }
+    #guides.on { display: block; }
+    #guides .safe { position: absolute; inset: 5% 5%; border: 1px dashed rgba(207, 230, 255, 0.35); }
+    #guides .title { position: absolute; inset: 10% 10%; border: 1px dashed rgba(207, 230, 255, 0.2); }
+    #guides .third { position: absolute; background: rgba(207, 230, 255, 0.15); }
+    #guides .copy { position: absolute; top: 10%; bottom: 10%; border: 1px solid rgba(47, 216, 255, 0.4); background: rgba(47, 216, 255, 0.04); }
+    #bar { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; display: flex; gap: 12px; align-items: center; padding: 0 16px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+    #bar input[type=range] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+    button, select { background: #0b1426; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font: inherit; }
+    #time { font-variant-numeric: tabular-nums; color: var(--dim); min-width: 120px; }
+    body.headless #bar { display: none; }
+    body.headless #stage { inset: 0; }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./node_modules/three/build/three.module.js",
+        "three/addons/": "./node_modules/three/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="stage">
+    <div id="frame">
+      <canvas id="c"></canvas>
+      <div id="guides">
+        <div class="safe"></div><div class="title"></div>
+        <div class="third" style="left:33.333%;top:0;bottom:0;width:1px"></div>
+        <div class="third" style="left:66.666%;top:0;bottom:0;width:1px"></div>
+        <div class="third" style="top:33.333%;left:0;right:0;height:1px"></div>
+        <div class="third" style="top:66.666%;left:0;right:0;height:1px"></div>
+        <div class="copy"></div>
+      </div>
+    </div>
+  </div>
+  <div id="bar">
+    <button id="play">Pause</button>
+    <input id="scrub" type="range" min="0" max="1" step="0.0001" value="0" />
+    <span id="time">0.00 s</span>
+    <select id="mode"><option value="loop">Seamless loop</option><option value="story">Story (16 s)</option></select>
+    <select id="preset"></select>
+    <button id="guidesBtn">Guides</button>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -40,6 +40,12 @@ git submodule add https://github.com/pinkforest/threejs-playground.git
 | **threejs-postprocessing** | EffectComposer, bloom, DOF, screen effects, custom passes               |
 | **threejs-interaction**    | Raycasting, camera controls, mouse/touch input, object selection        |
 
+## Examples
+
+| Example | Description |
+| --- | --- |
+| [`examples/holographic-ai-core`](examples/holographic-ai-core) | Procedural holographic motion graphics (glass sphere, rings, particles, custom GLSL, bloom) with a deterministic headless 4K PNG/H.264 export pipeline and automated QC |
+
 ## How It Works
 
 Claude Code automatically loads skill files from the `.claude/skills` directory when they match the context of your request. When you ask Claude Code to:
