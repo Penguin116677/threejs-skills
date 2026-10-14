@@ -11,7 +11,7 @@ const KEYS = [
     zenith: '#3f86d8', mid: '#86bfe9', horizon: '#cfe7f4', glow: '#fff3d9',
     fog: '#c8e1ef', sun: '#fff2dc', sunIntensity: 2.4, ambient: '#a9cbe6', ground: '#4f6d34',
     grassBase: '#163d10', grassTip: '#8fc24c', grassDry: '#bcc45c', terrain: '#24481a',
-    trailGlow: '#e9ffd0', trailGlowAmt: 0.10,
+    trailGlow: '#e9ffd0', trailGlowAmt: 0.16,
     cloudLit: '#fbfcff', cloudShade: '#b4c4da', cloudOpacity: 0.95,
     leaf: '#4f8f30', leafShade: '#163a14', bark: '#4a3a2c', rim: '#e8f4ff', rimAmt: 0.2,
     sunVis: 1, moonVis: 0, stars: 0, flowers: 0, fireflies: 0,
@@ -27,7 +27,7 @@ const KEYS = [
     cloudLit: '#fff1dd', cloudShade: '#c2a7b2', cloudOpacity: 0.95,
     leaf: '#4a6e26', leafShade: '#1f2f14', bark: '#4a342a', rim: '#ffd59a', rimAmt: 0.6,
     sunVis: 1, moonVis: 0, stars: 0, flowers: 0.15, fireflies: 0,
-    exposure: 1.0, bloom: 0.3, fogDensity: 0.011, wind: 0.5,
+    exposure: 1.0, bloom: 0.3, fogDensity: 0.0085, wind: 0.5,
     ui: { title: '#1b170d', sub: '#3a2c1d', nav: '#1b170d', muted: '#5e4d3c', btnBg: '#2a4a17', btnText: '#ffffff', glass: '#fff6ea', glassText: '#1b170d', leaf: '#4f8f2a', hint: '#ffffff', shadow: 0 }
   },
   {

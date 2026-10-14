@@ -127,7 +127,7 @@ export function createGrass({ count, flowerCount, field, trail }) {
 
       // Distant blades are scaled up so the field stays dense on screen.
       // ...and the closest ones are tall enough to rise into the frame.
-      const grow = (1 + d * 0.016) * (1 + 0.35 * (1 - THREE.MathUtils.smoothstep(d, 3, 9)));
+      const grow = (1 + d * 0.016) * (1 + 0.3 * (1 - THREE.MathUtils.smoothstep(d, 5, 11)));
       const tall = Math.random() < 0.1 ? 1.3 : 1;
       const height = (0.26 + Math.random() * 0.3) * grow * tall;
       const width = (0.02 + Math.random() * 0.014) * (1 + d * 0.07);
