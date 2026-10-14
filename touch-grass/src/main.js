@@ -108,6 +108,8 @@ if (!capture) window.addEventListener('resize', layout);
 
 // --------------------------------------------------------------- one step
 const tl = createTimelineState();
+const groundStart = heightAt(0, 0);
+const groundEnd = heightAt(0, -3.2);
 const raycaster = new THREE.Raycaster();
 const brushWorld = new THREE.Vector3();
 const lookAt = new THREE.Vector3();
@@ -130,7 +132,8 @@ function step(t, dt, draw = true) {
   shared.uWind.value = palette.wind * (1 + tl.gust);
   renderer.toneMappingExposure = palette.exposure;
 
-  camera.position.set(tl.eye.x, heightAt(tl.eye.x, tl.eye.z) + tl.eye.y, tl.eye.z);
+  // Ride a smoothed ground line, not the hill's small ripples (no bobbing).
+  camera.position.set(tl.eye.x, groundStart + (groundEnd - groundStart) * tl.push + tl.eye.y, tl.eye.z);
   lookAt.set(tl.look.x, HILL.top + tl.look.y, HILL.z);
   camera.lookAt(lookAt);
 

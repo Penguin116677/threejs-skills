@@ -21,8 +21,7 @@ export const BEATS = {
   sub: { in: 1.75, out: 5.95 },
   brushDay: [3.6, 2.6],
   gust: [4.4, 3.2],
-  toDusk: [7.0, 4.8],
-  toNight: [12.2, 4.2],
+  light: [6.8, 9.6],
   clock: { in: 7.2, out: 16.0 },
   brushNight: [13.4, 2.6],
   endTitle: { in: 16.3 },
@@ -60,21 +59,23 @@ function stroke(t, [start, dur], curve, out) {
 
 /** Sample every continuous parameter of the film at time t (seconds). */
 export function sampleTimeline(t, out) {
-  // Light: hold day, ease into dusk, linger, ease into night.
-  const dusk = ease.sine(progress(t, ...BEATS.toDusk));
-  const night = ease.sine(progress(t, ...BEATS.toNight));
-  out.timeOfDay = lerp(0, 0.5, dusk) + lerp(0, 0.5, night);
+  // Light: one continuous move from day to night. It slows down around dusk
+  // so the pink sky gets its moment, but never stops (no stall between acts).
+  const g = ease.sine(progress(t, ...BEATS.light));
+  out.timeOfDay = clamp01(g + (0.55 * Math.sin(2 * Math.PI * g)) / (2 * Math.PI));
+  const night = ease.sine((out.timeOfDay - 0.5) / 0.5);
 
   // Camera: rises out of the grass, then a long, slow push toward the tree
   // drifting left → right (the tree parallaxes gently against the sky).
-  const rise = ease.enter(progress(t, ...BEATS.rise));
+  // Every camera curve starts and ends at rest, so nothing jerks.
+  const rise = ease.sine(progress(t, ...BEATS.rise));
   const push = ease.sine(t / DURATION);
-  out.eye.set(lerp(-0.55, 0.55, push), lerp(0.3, 0.62, rise) + Math.sin(t * 0.45) * 0.012, lerp(0, -3.2, push));
-  out.look.set(lerp(-0.2, 0.25, push), lerp(7.2, 8.1, rise) + lerp(0, 0.5, night), 0);
+  out.push = push;
+  out.eye.set(lerp(-0.55, 0.55, push), lerp(0.3, 0.62, rise) + Math.sin((t / DURATION) * Math.PI * 4) * 0.01, lerp(0, -3.2, push));
+  out.look.set(lerp(-0.2, 0.25, push), lerp(7.2, 8.1, rise) + lerp(0, 0.45, night), 0);
 
   // Wind: a gust rolls across after the first brush (reaction beat).
-  const g = progress(t, ...BEATS.gust);
-  out.gust = Math.sin(Math.PI * g) ** 2 * 0.7;
+  out.gust = Math.sin(Math.PI * progress(t, ...BEATS.gust)) ** 2 * 0.7;
 
   out.brush = stroke(t, BEATS.brushDay, strokeDay, out.brushNdc) || stroke(t, BEATS.brushNight, strokeNight, out.brushNdc);
 
@@ -90,6 +91,7 @@ export function createTimelineState() {
     eye: new THREE.Vector3(),
     look: new THREE.Vector3(),
     gust: 0,
+    push: 0,
     brush: null,
     brushNdc: new THREE.Vector2(),
     fade: 1

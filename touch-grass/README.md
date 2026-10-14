@@ -36,7 +36,7 @@ changes use sine in-out.
 | --- | --- | --- |
 | 0 – 4.6 s | Setup | Fades up from black while the camera rises out of the grass. "touch grass" arrives letter by letter: 35 ms stagger, 0.95 s rise with blur. The subtitle follows word by word. |
 | 3.6 – 7 s | Action → reaction | An unseen hand brushes through the foreground and the blades bend away. A gust rolls across the hill in answer, and the title steps out (reverse stagger, 0.5 s). |
-| 7 – 16.2 s | Transition | Day melts into dusk: pink-orange sky, a dark reddish silhouette, flowers opening. Dusk then becomes night: moon, stars, fireflies, and a second brush that leaves a glowing trail. A small clock ticks along with the light. |
+| 6.8 – 16.4 s | Transition | One continuous move of the light, slowing near dusk but never stopping. Day melts into dusk: pink-orange sky, a dark reddish silhouette, flowers opening. Dusk then becomes night: moon, stars, fireflies, and a second brush that leaves a glowing trail. A small clock ticks along with the light. |
 | 16.2 – 20 s | Resolution | End card in white, a breath of stillness, then a fade to black, so the loop is seamless. |
 
 Under all of it, the camera makes one long, slow push toward the tree with
