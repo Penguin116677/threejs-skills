@@ -102,6 +102,7 @@ function boot() {
     get bufferSize() { return [bufW, bufH]; },
     get ssaa() { return ssaaUsed; },
     vertexCount: liquid.vertexCount,
+    liquid, // debug access: ILM.liquid.ribbons[0].visible = false, etc.
     renderAt,
     renderFrame: (n) => renderAt(frameToTime(n)),
     async framePNG(n) {

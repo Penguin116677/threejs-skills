@@ -56,10 +56,10 @@ float twistAngle(float s) {
 
 // Morph noise. Time enters only through uLoop (a circle) → exact loop.
 float flowNoise(float s, float e) {
-  float n = snoise(vec4(s * uNoiseFreq + uSeed * 7.13, e * 0.85 + uSeed * 3.71, uLoop * uLoopRadius));
+  float n = snoise(vec4(s * uNoiseFreq + uSeed * 7.13, e * 0.55 + uSeed * 3.71, uLoop * uLoopRadius));
 #if NOISE_OCTAVES > 1
-  n += 0.45 * snoise(vec4(s * uNoiseFreq * 2.07 + 19.1, e * 1.9 - 4.3, vec2(uLoop.y, -uLoop.x) * uLoopRadius * 1.6));
-  n *= 0.72;
+  n += 0.3 * snoise(vec4(s * uNoiseFreq * 1.93 + 19.1, e * 1.1 - 4.3, vec2(uLoop.y, -uLoop.x) * uLoopRadius * 1.6));
+  n *= 0.8;
 #endif
   return n;
 }
@@ -82,7 +82,7 @@ vec3 surfacePoint(float u, float beta, out float n) {
   float e = cos(beta);
   float f = sin(beta);
   n = flowNoise(s, e);
-  float h = uThickness * mix(0.4, 1.0, taper) * (1.0 + 0.55 * n);
+  float h = uThickness * mix(0.4, 1.0, taper) * (1.0 + 0.4 * n);
 
   vec3 p = c + N1 * (e * w) + B1 * (f * h);
   p += B1 * (uRipple * w * n); // the whole sheet undulates like a liquid film
@@ -161,13 +161,25 @@ float softbox(vec3 r, vec3 d, vec3 hint, vec2 halfSize, float soft) {
 // Analytic studio: dark navy room, white key strip + top box, coloured bounce cards.
 vec3 studioEnv(vec3 r, float soft) {
   r = uEnvRot * r;
-  vec3 col = mix(vec3(0.0012, 0.0018, 0.0055), vec3(0.010, 0.016, 0.045), smoothstep(-0.5, 0.8, r.y));
-  col += srgbToLinear(vec3(0.00, 0.80, 1.00)) * 0.85 * uBoxes.w * softbox(r, normalize(vec3(-1.0, 0.15, 0.35)), vec3(0.0, 1.0, 0.0), vec2(0.9, 1.4), 0.55 + soft);
-  col += srgbToLinear(vec3(1.00, 0.15, 0.80)) * 0.85 * uBoxes.w * softbox(r, normalize(vec3(1.0, -0.05, -0.25)), vec3(0.0, 1.0, 0.0), vec2(0.8, 1.2), 0.55 + soft);
-  col += srgbToLinear(vec3(0.45, 0.20, 1.00)) * 0.55 * uBoxes.w * softbox(r, normalize(vec3(0.2, -0.9, 0.3)), vec3(0.0, 0.0, 1.0), vec2(1.5, 1.0), 0.65 + soft);
-  col += vec3(6.0) * uBoxes.x * softbox(r, normalize(vec3(-0.35, 0.75, 0.60)), vec3(0.0, 0.0, 1.0), vec2(1.2, 0.07), 0.015 + soft);
-  col += vec3(2.5) * uBoxes.y * softbox(r, normalize(vec3(0.10, 1.0, 0.05)), vec3(0.0, 0.0, 1.0), vec2(0.55, 0.55), 0.04 + soft);
-  col += srgbToLinear(vec3(0.10, 0.35, 1.00)) * 3.0 * uBoxes.z * softbox(r, normalize(vec3(0.6, 0.35, -1.0)), vec3(0.0, 1.0, 0.0), vec2(0.22, 1.4), 0.03 + soft);
+  // Near-black room with a faint navy ceiling: chrome needs dark areas to read as chrome.
+  vec3 col = mix(vec3(0.0006, 0.0008, 0.0025), vec3(0.006, 0.010, 0.030), smoothstep(-0.4, 0.9, r.y));
+  // Cool horizon glow — the classic "chrome horizon line".
+  float hz = exp(-pow((r.y - 0.06) / (0.06 + soft), 2.0));
+  col += srgbToLinear(vec3(0.55, 0.75, 1.0)) * 0.35 * hz;
+  // Very wide, dim cool fill: large dark faces keep a gentle gradient instead of going flat.
+  col += srgbToLinear(vec3(0.35, 0.55, 1.0)) * 0.05 * softbox(r, normalize(vec3(-0.4, 0.5, 0.8)), vec3(0.0, 1.0, 0.0), vec2(1.2, 1.0), 0.9 + soft);
+  // Coloured bounce cards (smaller, so colour appears as accents, not a wash).
+  col += srgbToLinear(vec3(0.00, 0.82, 1.00)) * 1.4 * uBoxes.w * softbox(r, normalize(vec3(-1.0, 0.25, 0.30)), vec3(0.0, 1.0, 0.0), vec2(0.35, 0.9), 0.25 + soft);
+  col += srgbToLinear(vec3(1.00, 0.12, 0.78)) * 1.3 * uBoxes.w * softbox(r, normalize(vec3(1.0, 0.05, -0.20)), vec3(0.0, 1.0, 0.0), vec2(0.30, 0.8), 0.25 + soft);
+  // Floor bounce: a violet gradient that fades out, so big flat faces never turn into one flat colour.
+  col += srgbToLinear(vec3(0.42, 0.18, 1.00)) * 0.10 * uBoxes.w * smoothstep(-0.2, -0.9, r.y) * (0.6 + 0.4 * r.x);
+  // White key strip + top soft box + small kicker: the crisp chrome highlights.
+  col += vec3(7.0) * uBoxes.x * softbox(r, normalize(vec3(-0.35, 0.75, 0.60)), vec3(0.0, 0.0, 1.0), vec2(1.3, 0.06), 0.012 + soft);
+  col += vec3(3.0) * uBoxes.y * softbox(r, normalize(vec3(0.10, 1.0, 0.05)), vec3(0.0, 0.0, 1.0), vec2(0.5, 0.5), 0.03 + soft);
+  col += vec3(4.0) * uBoxes.y * softbox(r, normalize(vec3(0.75, 0.30, 0.55)), vec3(0.0, 1.0, 0.0), vec2(0.05, 0.45), 0.01 + soft);
+  col += vec3(2.2) * uBoxes.x * softbox(r, normalize(vec3(-0.05, 0.35, 1.0)), vec3(0.0, 1.0, 0.0), vec2(0.9, 0.025), 0.008 + soft);
+  // Electric-blue rim from behind.
+  col += srgbToLinear(vec3(0.10, 0.35, 1.00)) * 3.5 * uBoxes.z * softbox(r, normalize(vec3(0.6, 0.35, -1.0)), vec3(0.0, 1.0, 0.0), vec2(0.18, 1.4), 0.03 + soft);
   return col;
 }
 
@@ -180,18 +192,18 @@ void main() {
   vec3 env = studioEnv(R, 0.02);
 #if DUAL_LOBE
   // Second, blurrier lobe: gives the "thick liquid" sheen between the sharp highlights.
-  vec3 envSoft = studioEnv(normalize(mix(R, N, 0.35)), 0.30);
-  env = mix(envSoft, env, 0.7);
+  vec3 envSoft = studioEnv(normalize(mix(R, N, 0.3)), 0.35);
+  env = mix(envSoft, env, 0.78);
 #endif
 
   // Thin-film inspired colour: hue depends on film thickness and refraction angle.
   float sinT2 = (1.0 - NdV * NdV) / (1.45 * 1.45);
   float cosT = sqrt(max(1.0 - sinT2, 0.0));
   vec3 irid = irisPalette(vFilm * uFilmScale * cosT + uHueShift);
-  float iridMask = uIrid * mix(0.45, 1.0, pow(1.0 - NdV, 1.5));
+  float iridMask = uIrid * mix(0.12, 1.0, pow(1.0 - NdV, 1.8)); // silver face-on, colour toward the edges
 
   vec3 F0 = vec3(0.90, 0.92, 0.96); // polished chrome / silver
-  vec3 tint = mix(F0, irid * 1.6, iridMask);
+  vec3 tint = mix(F0, irid * 1.5, iridMask);
   vec3 F = tint + (vec3(1.0) - tint) * pow(1.0 - NdV, 5.0);
   vec3 col = env * F * uBrightness;
 

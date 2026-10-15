@@ -15,6 +15,7 @@
 //   --loopcheck      also render t = 15.000 s as loopcheck_T.png (must match frame_00000.png)
 //   --gpu            use the machine's GPU instead of SwiftShader (faster; results can differ by ±1 LSB)
 //   --port N         local server port (default 8123)
+//   --w N --h N      output size (default 1920×1080; smaller = quick motion previews)
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
@@ -33,6 +34,8 @@ const start = +opt('start', 0);
 const ssaa = +opt('ssaa', 2);
 const quality = opt('quality', 'high');
 const port = +opt('port', 8123);
+const W = +opt('w', 1920);
+const H = +opt('h', 1080);
 
 async function loadPlaywright() {
   try {
@@ -55,7 +58,7 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log(`[page ${m.type()}] ${m.text()}`); });
 page.on('pageerror', (e) => console.log(`[page error] ${e.message}`));
 
-const url = `http://localhost:${port}/index.html?mode=capture&ui=0&q=${quality}&w=1920&h=1080&ssaa=${ssaa}`;
+const url = `http://localhost:${port}/index.html?mode=capture&ui=0&q=${quality}&w=${W}&h=${H}&ssaa=${ssaa}`;
 await page.goto(url);
 await page.waitForFunction(() => window.ILM && window.ILM.ready, null, { timeout: 60000 });
 const info = await page.evaluate(() => ({ size: window.ILM.bufferSize, ssaa: window.ILM.ssaa, gpu: window.ILM.caps.gpu, frames: window.ILM.VIDEO.frames, vtx: window.ILM.vertexCount }));
@@ -72,7 +75,9 @@ for (let n = start; n <= end; n++) {
   writeFileSync(file, Buffer.from(b64, 'base64'));
   const done = n - start + 1;
   const per = (Date.now() - t0) / 1000 / done;
-  process.stdout.write(`\r  frame ${n} (${done}/${end - start + 1})  ${per.toFixed(2)} s/frame  ETA ${Math.round(per * (end - n))} s   `);
+  const line = `  frame ${n} (${done}/${end - start + 1})  ${per.toFixed(2)} s/frame  ETA ${Math.round(per * (end - n))} s`;
+  if (process.stdout.isTTY) process.stdout.write(`\r${line}   `);
+  else if (done % 30 === 0 || n === end) console.log(line);
 }
 process.stdout.write('\n');
 if (flag('loopcheck')) {

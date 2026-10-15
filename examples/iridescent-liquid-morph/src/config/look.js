@@ -15,8 +15,8 @@ export const RIBBONS = [
     loopRadius: 0.55,
     brightness: 1.0,
     detail: 1.0, // fraction of the preset's grid resolution
-    position: [0.9, -0.25, 0.0],
-    rotation: [0.25, -0.35, 0.18],
+    position: [1.5, -0.45, 0.0],
+    rotation: [0.3, -0.3, 0.38], // diagonal: rises toward the upper right, keeps upper left free
   },
   {
     name: 'echo',
@@ -31,15 +31,15 @@ export const RIBBONS = [
     loopRadius: 0.6,
     brightness: 0.55,
     detail: 0.6,
-    position: [1.4, 0.4, -2.2],
-    rotation: [-0.2, 0.3, -0.25],
+    position: [2.6, 1.05, -3.6], // upper right, far behind the hero: depth without touching the text zone
+    rotation: [-0.1, 0.3, 0.2],
   },
 ];
 
 export const SHADING = {
   exposure: 1.0,
-  iridescence: 0.65,
-  filmScale: 1.3,
+  iridescence: 0.75,
+  filmScale: 1.1,
   fogColor: [0.004, 0.006, 0.016], // linear
   fogNear: 8.0,
   fogFar: 15.0,
@@ -55,7 +55,7 @@ export const BACKGROUND = {
 };
 
 export const CAMERA = {
-  fov: 30, // long-ish lens: calmer perspective, more "product shot"
+  fov: 31, // long-ish lens: calmer perspective, more "product shot"
   position: [0.0, 0.35, 10.0],
   target: [0.0, 0.1, 0.0],
   near: 0.1,
