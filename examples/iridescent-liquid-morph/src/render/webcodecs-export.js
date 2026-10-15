@@ -1,44 +1,49 @@
-// On-device H.264 export (Android Chrome) via WebCodecs + mp4-muxer.
+// On-device H.264 export (Android Chrome) via WebCodecs + mp4-muxer (vendored, MIT).
 // Frames are rendered one by one at exact timestamps (not screen-recorded),
 // so dropped frames are impossible. Support is PROBED first — many devices
 // have a hardware H.264 encoder, but the browser may still refuse a config.
 import { Muxer, ArrayBufferTarget } from '../../vendor/mp4-muxer/mp4-muxer.mjs';
 
-const CANDIDATES = [
-  { codec: 'avc1.640028', label: 'H.264 High @ L4.0' },
-  { codec: 'avc1.4d0028', label: 'H.264 Main @ L4.0' },
-  { codec: 'avc1.42e028', label: 'H.264 Constrained Baseline @ L4.0' },
-];
+const CANDIDATES = {
+  h264: [
+    { codec: 'avc1.640028', mux: 'avc', label: 'H.264 High @ L4.0' },
+    { codec: 'avc1.4d0028', mux: 'avc', label: 'H.264 Main @ L4.0' },
+    { codec: 'avc1.42e028', mux: 'avc', label: 'H.264 Constrained Baseline @ L4.0' },
+  ],
+  // Fallback only: Adobe Stock does not take VP9 — re-encode with ffmpeg (README, "Termux").
+  vp9: [{ codec: 'vp09.00.40.08', mux: 'vp9', label: 'VP9 (fallback — wajib encode ulang ke H.264)' }],
+};
 
-export async function probeH264(width, height, fps, bitrate) {
+export async function probeEncoder(width, height, fps, bitrate, family = 'h264') {
   if (!window.isSecureContext) {
     return { ok: false, reason: 'WebCodecs butuh secure context: buka lewat https:// atau http://localhost (bukan IP LAN).' };
   }
   if (typeof window.VideoEncoder === 'undefined' || typeof window.VideoFrame === 'undefined') {
     return { ok: false, reason: 'Browser ini tidak menyediakan WebCodecs VideoEncoder (butuh Chrome 94+).' };
   }
-  for (const c of CANDIDATES) {
-    const config = { codec: c.codec, width, height, bitrate, framerate: fps, avc: { format: 'avc' } };
+  for (const c of CANDIDATES[family] || CANDIDATES.h264) {
+    const config = { codec: c.codec, width, height, bitrate, framerate: fps };
+    if (c.mux === 'avc') config.avc = { format: 'avc' }; // length-prefixed NALs, as MP4 needs
     try {
       const res = await VideoEncoder.isConfigSupported(config);
-      if (res.supported) return { ok: true, config, label: c.label };
+      if (res.supported) return { ok: true, config, label: c.label, mux: c.mux };
     } catch (e) {
       /* try next */
     }
   }
-  return { ok: false, reason: `Encoder H.264 ${width}×${height} tidak didukung di perangkat/browser ini.` };
+  return { ok: false, reason: `Encoder ${family === 'vp9' ? 'VP9' : 'H.264'} ${width}×${height} tidak didukung di perangkat/browser ini.` };
 }
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 // drawFrame(n) must render frame n into sourceCanvas synchronously.
-export async function exportMp4({ width, height, fps, frames, bitrate, sourceCanvas, drawFrame, onProgress, shouldCancel }) {
-  const probe = await probeH264(width, height, fps, bitrate);
+export async function exportMp4({ width, height, fps, frames, bitrate, family = 'h264', sourceCanvas, drawFrame, onProgress, shouldCancel }) {
+  const probe = await probeEncoder(width, height, fps, bitrate, family);
   if (!probe.ok) throw new Error(probe.reason);
 
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),
-    video: { codec: 'avc', width, height, frameRate: fps },
+    video: { codec: probe.mux, width, height, frameRate: fps },
     fastStart: 'in-memory', // moov atom at the start (= "faststart")
     firstTimestampBehavior: 'offset',
   });

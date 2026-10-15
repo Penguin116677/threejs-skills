@@ -28,16 +28,21 @@ export const DEFAULT_QUALITY = 'medium';
 export function readParams(search = window.location.search) {
   const q = new URLSearchParams(search);
   const num = (k, d) => (q.has(k) && Number.isFinite(+q.get(k)) ? +q.get(k) : d);
-  const quality = QUALITY[q.get('q')] ? q.get('q') : DEFAULT_QUALITY;
+  const capture = q.get('mode') === 'capture';
+  // Capture/export defaults to the highest preset; preview defaults to medium.
+  const quality = QUALITY[q.get('q')] ? q.get('q') : capture ? 'high' : DEFAULT_QUALITY;
   return {
     quality,
     preset: QUALITY[quality],
-    mode: q.get('mode') === 'capture' ? 'capture' : 'preview',
+    mode: capture ? 'capture' : 'preview',
     time: num('t', null), // ?t=7.5  -> open paused on that timestamp
     frame: num('frame', null), // ?frame=120
     width: Math.round(num('w', VIDEO.width)),
     height: Math.round(num('h', VIDEO.height)),
     ssaa: Math.min(Math.max(Math.round(num('ssaa', 1)), 1), 2), // 1 or 2 (supersampling for export)
     ui: q.get('ui') !== '0',
+    // In-browser export codec: 'h264' (default, for delivery) or 'vp9' (fallback for devices
+    // without an H.264 encoder — the file MUST be re-encoded to H.264 with ffmpeg before upload).
+    exportCodec: q.get('exportCodec') === 'vp9' ? 'vp9' : 'h264',
   };
 }

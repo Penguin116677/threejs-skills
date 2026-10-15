@@ -40,6 +40,12 @@ git submodule add https://github.com/pinkforest/threejs-playground.git
 | **threejs-postprocessing** | EffectComposer, bloom, DOF, screen effects, custom passes               |
 | **threejs-interaction**    | Raycasting, camera controls, mouse/touch input, object selection        |
 
+## Examples
+
+| Example | Description |
+| ------- | ----------- |
+| [**iridescent-liquid-morph**](examples/iridescent-liquid-morph/) | Seamless 15 s loop of a liquid chrome ribbon (vertex-shader deformation, analytic studio reflections, thin-film-style iridescence), Android-friendly preview, deterministic frame export to H.264. README in Indonesian. |
+
 ## How It Works
 
 Claude Code automatically loads skill files from the `.claude/skills` directory when they match the context of your request. When you ask Claude Code to:

@@ -4,7 +4,7 @@ import { checkWebGL2, createRenderer, maxCanvasEdge } from './render/renderer.js
 import { LiquidScene } from './render/liquid-scene.js';
 import { sampleTimeline, frameToTime, timeToFrame, wrapTime } from './animation/timeline.js';
 import { runLoopTest } from './render/loop-test.js';
-import { exportMp4, probeH264 } from './render/webcodecs-export.js';
+import { exportMp4, probeEncoder } from './render/webcodecs-export.js';
 import { createPreviewUI, createCapturePanel, showFatal, positionGuide } from './ui/preview-ui.js';
 
 const params = readParams();
@@ -142,6 +142,7 @@ function boot() {
             fps: VIDEO.fps,
             frames: VIDEO.frames,
             bitrate,
+            family: params.exportCodec,
             sourceCanvas: canvas,
             drawFrame: (n) => renderAt(frameToTime(n)),
             onProgress: (i, n, label) => {
@@ -150,7 +151,7 @@ function boot() {
             },
             shouldCancel: () => cancel,
           });
-          const name = `iridescent-liquid-morph_${params.width}x${params.height}_${VIDEO.fps}fps.mp4`;
+          const name = `iridescent-liquid-morph_${params.width}x${params.height}_${VIDEO.fps}fps${params.exportCodec === 'vp9' ? '_vp9' : ''}.mp4`;
           const a = download(res.blob, name);
           panel.status(`Selesai (${res.codec}, ${(res.blob.size / 1e6).toFixed(1)} MB). Ketuk untuk menyimpan: `);
           document.querySelector('#ui .panel .msg').append(a);
@@ -171,8 +172,9 @@ function boot() {
         location.search = q.toString();
       },
     });
-    probeH264(params.width, params.height, VIDEO.fps, 24e6).then((p) => {
+    probeEncoder(params.width, params.height, VIDEO.fps, 24e6, params.exportCodec).then((p) => {
       if (!p.ok) panel.status(`⚠️ ${p.reason} Gunakan alur PNG + ffmpeg (lihat README).`);
+      else panel.status(`Siap: ${p.label} · ${params.width}×${params.height}${ssaaUsed > 1 ? ` (SSAA ${ssaaUsed}×)` : ''} · ${VIDEO.fps} fps · ${VIDEO.frames} frame · GPU: ${caps.gpu}`);
     });
     window.addEventListener('resize', () => { layout(); renderAt(currentT); });
     return;
@@ -257,7 +259,7 @@ function boot() {
     }
     fpsTime += dt;
     if (fpsTime > 0.5) {
-      if (ui) ui.setFps(fpsFrames / fpsTime, `${bufW}×${bufH} · ${(liquid.vertexCount / 1000).toFixed(0)}k vtx`);
+      if (ui) ui.setFps(playing ? fpsFrames / fpsTime : null, `${bufW}×${bufH} · ${(liquid.vertexCount / 1000).toFixed(0)}k vtx`);
       fpsFrames = 0;
       fpsTime = 0;
     }

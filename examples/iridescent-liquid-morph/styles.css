@@ -93,3 +93,12 @@ button:disabled { opacity: 0.4; }
   button, select { padding: 6px 8px; font-size: 12px; }
   .mono { font-size: 11px; }
 }
+/* Short landscape phones: compact single-line rows so the picture stays visible. */
+@media (max-height: 500px) {
+  #ui { padding-top: 4px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
+  .panel { padding: 5px; border-radius: 10px; background: rgba(8, 11, 22, 0.7); }
+  .row + .row, .row + .msg { margin-top: 4px; }
+  .row.wrap { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  button, select { min-height: 30px; padding: 3px 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+  .mono { font-size: 11px; }
+}

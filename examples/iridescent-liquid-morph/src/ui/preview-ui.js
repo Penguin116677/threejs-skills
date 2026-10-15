@@ -88,7 +88,7 @@ export function createPreviewUI(o) {
     },
     setPlaying(p) { play.textContent = p ? '❚❚' : '▶'; },
     setSeam(on) { seam.classList.toggle('on', on); },
-    setFps(f, extra) { fpsOut.textContent = `${f.toFixed(0)} fps · ${extra}`; },
+    setFps(f, extra) { fpsOut.textContent = `${f == null ? 'dijeda' : `${f.toFixed(0)} fps`} · ${extra}`; },
     message(html) { msg.hidden = !html; msg.innerHTML = html || ''; },
   };
 }
