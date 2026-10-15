@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#000000" />
+    <title>Iridescent Liquid Morph</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three/three.module.min.js" } }
+    </script>
+  </head>
+  <body>
+    <div id="stage">
+      <canvas id="gl"></canvas>
+    </div>
+    <!-- Overlay guides (DOM only — never rendered into frames) -->
+    <div id="guide" hidden>
+      <div class="safe"></div>
+      <div class="textzone"><span>Ruang teks iklan<br />(negative space)</span></div>
+    </div>
+    <div id="ui"></div>
+    <div id="fatal" hidden></div>
+    <noscript><div id="fatal">JavaScript harus aktif.</div></noscript>
+    <script type="module" src="./src/main.js"></script>
+    <script>
+      // If modules fail to load (file:// URL, old browser, missing files) say so instead of a black screen.
+      setTimeout(function () {
+        if (!window.ILM && document.getElementById('fatal').hidden) {
+          var f = document.getElementById('fatal');
+          f.hidden = false;
+          f.textContent = location.protocol === 'file:'
+            ? 'Buka lewat server lokal (http://localhost:8080), bukan file://. Lihat README.'
+            : 'Modul gagal dimuat. Pastikan browser mendukung ES modules + import maps (Chrome 89+) dan semua file ikut tersalin.';
+        }
+      }, 8000);
+    </script>
+  </body>
+</html>
