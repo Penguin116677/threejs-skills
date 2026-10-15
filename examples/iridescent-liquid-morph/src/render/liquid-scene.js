@@ -36,8 +36,10 @@ export class LiquidScene {
   }
 
   // Background shader works in pixels: tell it the size of the buffer we draw into.
-  setTargetSize(width, height) {
+  // pixelScale = SSAA factor, so grain stays one value per final output pixel.
+  setTargetSize(width, height, pixelScale = 1) {
     this.background.uniforms.uResolution.value.set(width, height);
+    this.shared.uPixelScale.value = pixelScale;
   }
 
   update(sample) {

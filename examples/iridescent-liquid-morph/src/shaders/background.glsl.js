@@ -1,4 +1,4 @@
-// Background: dark navy → black gradient, faint glow behind the hero, vignette, dither.
+// Background: dark navy → black gradient, faint glow behind the hero, vignette, grain/dither.
 // Drawn as a fullscreen triangle in clip space (ignores the camera).
 import { commonGLSL } from './noise.glsl.js';
 
@@ -12,6 +12,8 @@ export const backgroundFragmentShader = /* glsl */ `
 ${commonGLSL}
 uniform vec2  uResolution;  // drawing-buffer size in pixels
 uniform float uFrameSeed;
+uniform float uGrain;       // grain amplitude in 8-bit steps
+uniform float uPixelScale;  // SSAA factor (grain is per output pixel)
 uniform vec2  uGlowPos;     // 0..1 screen position of the glow (periodic drift)
 uniform float uGlowAmt;
 uniform vec3  uTop;         // sRGB
@@ -33,6 +35,6 @@ void main() {
   float vig = 1.0 - smoothstep(0.45, 1.3, length(p * vec2(0.8, 1.0)));
   col *= mix(0.55, 1.0, vig);
 
-  gl_FragColor = vec4(col + dither8(gl_FragCoord.xy, uFrameSeed), 1.0);
+  gl_FragColor = vec4(col + grain8(gl_FragCoord.xy, uPixelScale, uFrameSeed, uGrain), 1.0);
 }
 `;

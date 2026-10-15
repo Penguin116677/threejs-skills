@@ -52,6 +52,7 @@ export const BACKGROUND = {
   glow: [0.12, 0.07, 0.3], // sRGB, faint violet glow behind the hero
   glowAmount: 0.55,
   glowPos: [0.66, 0.45], // screen 0..1 (x right, y up)
+  grain: 3.0, // deterministic luma grain, ±LSB (8-bit). Keeps dark gradients band-free after H.264.
 };
 
 export const CAMERA = {

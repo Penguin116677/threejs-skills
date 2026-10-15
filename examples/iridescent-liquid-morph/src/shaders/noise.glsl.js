@@ -93,11 +93,15 @@ float hash12(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// Triangular dither of ±1 LSB (8-bit) — hides gradient banding before H.264.
-vec3 dither8(vec2 fragCoord, float seed) {
-  float a = hash12(fragCoord + seed * 17.13);
-  float b = hash12(fragCoord.yx + seed * 31.71 + 7.0);
-  return vec3((a - b) / 255.0);
+// Deterministic luma grain / dither, triangular PDF, amplitude in 8-bit steps (LSB).
+// It is computed per OUTPUT pixel (fragCoord / pixelScale): with SSAA 2× each 2×2 block shares
+// one value, so the final downscale does not average the dither away. ±2–3 LSB survives H.264
+// encoding and prevents banding in the dark navy gradients; ±1 LSB is removed by the encoder.
+vec3 grain8(vec2 fragCoord, float pixelScale, float seed, float amp) {
+  vec2 cell = floor(fragCoord / pixelScale);
+  float a = hash12(cell + seed * 17.13);
+  float b = hash12(cell.yx + seed * 31.71 + 7.0);
+  return vec3((a - b) * amp / 255.0);
 }
 
 // Narkowicz ACES filmic fit (input linear, output linear 0..1).

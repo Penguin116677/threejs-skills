@@ -12,10 +12,13 @@ COUNT=$(ls "$IN"/frame_*.png | wc -l)
 echo "Encoding $COUNT frames from $IN → $OUT"
 
 # scale: SSAA downsample (3840→1920) with lanczos + RGB→YUV with the BT.709 matrix, limited range.
+# -crf 12 -tune grain: keeps the shader's fine luma grain, which is what prevents banding in the
+# dark navy gradients (measured ≈ 50 Mbit/s ≈ 95 MB for 15 s). Plain -crf 14 smooths the grain
+# away and contour bands come back.
 VF="scale=1920:1080:flags=lanczos+accurate_rnd+full_chroma_int:out_color_matrix=bt709:out_range=tv,format=yuv420p"
 
 ffmpeg -hide_banner -y -framerate $FPS -i "$IN/frame_%05d.png" \
-  -vf "$VF" -c:v libx264 -preset slow -crf 14 -profile:v high -level:v 4.2 \
+  -vf "$VF" -c:v libx264 -preset slow -crf 12 -tune grain -profile:v high -level:v 4.2 \
   -g $FPS -bf 2 -pix_fmt yuv420p \
   -color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv \
   -r $FPS -an -movflags +faststart "$OUT"

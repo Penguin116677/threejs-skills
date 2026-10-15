@@ -10,8 +10,9 @@ mana pun bisa dirender ulang persis sama, dan frame terakhir menyambung mulus ke
 
 > **Status pengujian (jujur):**
 > - ✅ Diuji di Chromium headless (SwiftShader/WebGL2): render semua preset, UI pratinjau di
->   viewport ponsel, uji loop di browser, render 450 frame PNG, encode H.264 dengan ffmpeg,
->   cek loop dengan ffmpeg (frame t=0 dan t=15 identik bit-per-bit).
+>   viewport ponsel, uji loop di browser, render 450 frame PNG (SSAA 2×), encode H.264 dengan
+>   ffmpeg, cek loop dengan ffmpeg (frame t=0 dan t=15 identik bit-per-bit), cek banding.
+>   File uji: H.264 High 1920×1080, 30/1, 450 frame, 15,000 s, BT.709, tanpa audio, 95 MB.
 > - ✅ Alur ekspor WebCodecs → MP4 diuji ujung-ke-ujung dengan codec **VP9** (build Chromium
 >   open-source tidak punya encoder H.264).
 > - ⚠️ **Belum diuji di perangkat Android sungguhan.** FPS dan dukungan encoder H.264 di ponsel
@@ -74,7 +75,7 @@ iridescent-liquid-morph/
 | **Material** | Chrome = pantulan *environment studio analitik* (soft box persegi membulat, strip putih, kartu pantul cyan/magenta, horizon dingin). Lapisan iridesen meniru *thin film*: hue bergantung pada ketebalan film dan sudut pandang, dibatasi ke palet cyan→biru→violet→magenta. Silver saat menghadap kamera, berwarna di sudut miring. |
 | **Pencahayaan** | Studio berputar perlahan, intensitas tiap lampu "bernapas" ±10–18 %, hue bergeser bolak-balik. Semua periodik. |
 | **Kamera** | Lensa FOV 31°, orbit kecil + mengambang + roll halus, periodik. |
-| **Output** | Tone mapping ACES → sRGB → dither ±1 LSB (mencegah *banding* gradasi gelap). |
+| **Output** | Tone mapping ACES → sRGB → *grain* luma deterministik ±3 level per piksel output (mencegah *banding* gradasi gelap setelah kompresi H.264). |
 | **Loop** | Semua nilai animasi = fungsi `sin/cos(k·φ)` dengan `k` bilangan bulat, `φ = 2π·t/15`. Jadi t=0 dan t=15 identik secara matematis. Frame 0–449 diekspor; frame 450 = frame 0. |
 | **Android** | Hanya WebGL2 inti. Tanpa float render target, tanpa tekstur, tanpa ekstensi wajib. `highp` dijamin oleh WebGL2. Kualitas: Low / Medium / High. |
 
@@ -162,9 +163,9 @@ API untuk DevTools / otomasi (`window.ILM`): `renderAt(t)`, `renderFrame(n)`, `f
 **Di Android (tanpa alat tambahan):**
 1. Tekan **Uji loop**. Halaman merender frame kecil (480×270) ke render target 8-bit, lalu
    membandingkan piksel:
-   - *Identitas*: t=0 vs t=15. Harus ≈ 0 (hasil di pengujian ini: 0,001 dari 255) ✅
+   - *Identitas*: t=0 vs t=15. Harus ≈ 0 (hasil di pengujian ini: 0,0016 dari 255) ✅
    - *Sambungan*: f449→f0 dibandingkan dengan perubahan normal antar-frame. Harus berada di
-     rentang yang sama (hasil di sini: 1,44 vs median 1,65) ✅
+     rentang yang sama (hasil di sini, preset medium: 2,23 vs median 2,34) ✅
 2. Tekan **Sambungan loop** dan amati penghitung waktu melompat dari 15 ke 0. Tidak boleh ada
    kedutan, lompatan warna, atau perubahan kecepatan.
 3. Periksa frame tertentu dengan `?frame=0`, `?frame=449`, atau tombol ‹ ›.
@@ -176,9 +177,9 @@ bash tools/check-loop.sh frames
 Hasil di pengujian ini:
 ```
 identity  t=0 vs t=T     : PSNR inf dB      ← identik bit-per-bit
-seam      f00449 → f00000 : PSNR 31.9 dB
-reference f00050 → f00051 : PSNR 30.8 dB    ← sambungan ada di dalam rentang
-reference f00350 → f00351 : PSNR 33.7 dB       pasangan normal = mulus
+seam      f00449 → f00000 : PSNR 31.0 dB
+reference f00050 → f00051 : PSNR 30.1 dB    ← sambungan ada di dalam rentang
+reference f00350 → f00351 : PSNR 32.6 dB       pasangan normal = mulus
 ```
 **Uji mata:** putar video berulang (VLC → *Repeat One*, atau `ffplay -loop 0 video.mp4`), atau
 buat file 3× loop untuk ditonton:
@@ -201,12 +202,15 @@ npm run check-loop               # = bash tools/check-loop.sh frames
 ```
 - `--ssaa 2`: tiap frame dirender 3840×2160 lalu diperkecil (lanczos) ke 1920×1080. Tepi pita
   tipis jadi jauh lebih halus. Disk: ±450 PNG 4K ≈ 3–4 GB sementara.
-- Waktu yang terukur di pengujian ini (CPU, SwiftShader): ≈ 2 detik/frame pada 3840×2160, jadi
-  ±15 menit. Dengan GPU sungguhan tambahkan `--gpu` (lebih cepat, tapi bisa beda ±1 LSB dari
+- Waktu yang terukur di pengujian ini (CPU, SwiftShader): ≈ 1,5–2 detik/frame pada 3840×2160,
+  jadi ±12–15 menit, ditambah ±1,5 menit encode. Dengan GPU sungguhan tambahkan `--gpu` (lebih cepat, tapi bisa beda ±1 LSB dari
   SwiftShader).
 - Render bisa dilanjutkan bila terputus: `--resume`. Hanya sebagian: `--start 0 --end 59`.
-- Output `encode-h264.sh`: H.264 High, CRF 14, `yuv420p`, BT.709 bertag, GOP 1 detik,
-  `+faststart`, tanpa audio.
+- Output `encode-h264.sh`: H.264 High, CRF 12 + `-tune grain`, `yuv420p`, BT.709 bertag,
+  GOP 1 detik, `+faststart`, tanpa audio. Terukur ≈ 50 Mbit/s (≈ 95 MB / 15 s).
+  **Jangan naikkan CRF** (mis. 18–23) atau hapus `-tune grain` demi file kecil. Encoder akan
+  menghaluskan grain dan pita kontur (*banding*) muncul lagi di latar navy. Ini sudah diuji:
+  CRF 14 tanpa `-tune grain` menghasilkan pita yang terlihat bila kontras dinaikkan.
 - Master ProRes 422 HQ (opsional, ukuran besar): `PRORES=1 bash tools/encode-h264.sh frames`.
 
 ### 6B. Jalur Android saja — WebCodecs di Chrome
@@ -214,7 +218,7 @@ npm run check-loop               # = bash tools/check-loop.sh frames
 1. Buka `http://localhost:8080/?mode=capture` (atau tombol **Mode render/ekspor →**).
 2. Panel menampilkan **"Siap: H.264 …"** jika encoder tersedia. Jika muncul ⚠️, perangkat ini
    tidak bisa (lihat di bawah).
-3. Pilih bitrate (40 Mbps disarankan), tekan **Ekspor MP4 H.264**, tunggu 450 frame, lalu
+3. Pilih bitrate (50 Mbps disarankan), tekan **Ekspor MP4 H.264**, tunggu 450 frame, lalu
    ketuk tautan untuk menyimpan.
 
 Catatan jujur untuk jalur ini:
@@ -226,7 +230,7 @@ Catatan jujur untuk jalur ini:
   ```bash
   pkg install ffmpeg
   ffmpeg -i iridescent-liquid-morph_1920x1080_30fps.mp4 \
-    -c:v libx264 -preset slow -crf 16 -profile:v high -pix_fmt yuv420p \
+    -c:v libx264 -preset slow -crf 12 -tune grain -profile:v high -pix_fmt yuv420p \
     -color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv \
     -an -movflags +faststart final_1920x1080_30fps.mp4
   ```
@@ -234,7 +238,8 @@ Catatan jujur untuk jalur ini:
 - Jika encoder H.264 tidak tersedia: `?mode=capture&exportCodec=vp9` mengekspor VP9 di dalam
   MP4. File ini **wajib** di-encode ulang ke H.264 dengan perintah ffmpeg di atas. Jangan
   upload VP9.
-- Butuh memori ±50–80 MB untuk file 15 detik. Tutup aplikasi lain bila ponsel memorinya kecil.
+- Butuh memori ±100 MB untuk file 15 detik pada 50 Mbps. Tutup aplikasi lain bila memori ponsel kecil.
+- Banyak encoder ponsel menghaluskan grain halus, sehingga banding bisa muncul. Periksa gradasi latar sebelum mengirim.
 
 ### Verifikasi file akhir (PC atau Termux)
 
@@ -265,8 +270,10 @@ Harus terbaca: `h264`, `High`, `1920`, `1080`, `30/1`, `yuv420p`, `bt709`, `nb_f
 **Visual**
 - [ ] Ditonton 3× berulang: sambungan loop tidak terlihat (tidak ada kedutan, lompatan warna,
       atau perubahan kecepatan)
-- [ ] Tidak ada *banding* di latar navy. Cek di layar terang dan gelap, dan setelah encode
-      akhir, bukan hanya di PNG
+- [ ] Tidak ada *banding* di latar navy. Cek **file akhir**, bukan PNG. Trik: ambil satu frame
+      dan naikkan kontrasnya ekstrem:
+      `ffmpeg -ss 8 -i final.mp4 -frames:v 1 -vf "curves=all='0/0 0.12/1'" cek.png`.
+      Gradasi harus berbintik halus, bukan bergaris kontur.
 - [ ] Tidak ada *aliasing*/kerlip di tepi pita yang tipis (gunakan SSAA 2 untuk master)
 - [ ] Zona kiri atas tetap kosong di seluruh 15 detik. Cek dengan **Panduan teks**. (Di render
       ini ujung pita sesekali menyentuh sudut kanan-bawah zona; geser `position` di

@@ -70,7 +70,7 @@ function boot() {
     }
     bufW = renderer.domElement.width;
     bufH = renderer.domElement.height;
-    liquid.setTargetSize(bufW, bufH);
+    liquid.setTargetSize(bufW, bufH, capture ? ssaaUsed : 1);
     positionGuide(canvas);
   }
 
@@ -82,7 +82,7 @@ function boot() {
     return s;
   }
   const restore = () => {
-    liquid.setTargetSize(bufW, bufH);
+    liquid.setTargetSize(bufW, bufH, capture ? ssaaUsed : 1);
     renderAt(currentT);
   };
 

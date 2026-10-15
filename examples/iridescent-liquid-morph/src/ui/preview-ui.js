@@ -96,8 +96,8 @@ export function createPreviewUI(o) {
 export function createCapturePanel(o) {
   const root = document.getElementById('ui');
   const bitrate = el('select', { 'aria-label': 'Bitrate' },
-    el('option', { value: '24000000' }, '24 Mbps'),
-    el('option', { value: '40000000', selected: '' }, '40 Mbps'),
+    el('option', { value: '50000000', selected: '' }, '50 Mbps (disarankan)'),
+    el('option', { value: '30000000' }, '30 Mbps'),
     el('option', { value: '16000000' }, '16 Mbps (memori kecil)'));
   const bar = el('progress', { max: '1', value: '0' });
   const status = el('div', { class: 'msg' }, o.status);

@@ -122,6 +122,8 @@ uniform vec3  uFogColor;    // linear
 uniform vec2  uFog;         // near / far distance
 uniform float uFogAmount;
 uniform float uFrameSeed;
+uniform float uGrain;
+uniform float uPixelScale;
 uniform float uBrightness;  // per-ribbon multiplier (background ribbons are dimmer)
 
 varying vec3  vWorldPos;
@@ -211,6 +213,6 @@ void main() {
   col = mix(col, uFogColor, uFogAmount * smoothstep(uFog.x, uFog.y, d));
 
   col = acesFilm(col * uExposure);
-  gl_FragColor = vec4(linearToSRGB(col) + dither8(gl_FragCoord.xy, uFrameSeed), 1.0);
+  gl_FragColor = vec4(linearToSRGB(col) + grain8(gl_FragCoord.xy, uPixelScale, uFrameSeed, uGrain), 1.0);
 }
 `;

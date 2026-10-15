@@ -10,6 +10,8 @@ export function createSharedUniforms() {
     uPhase: { value: 0 },
     uLoop: { value: new Vector2(1, 0) },
     uFrameSeed: { value: 0 },
+    uGrain: { value: BACKGROUND.grain },
+    uPixelScale: { value: 1 },
     uEnvRot: { value: new Matrix3() },
     uBoxes: { value: new Vector4(1, 1, 1, 1) },
     uHueShift: { value: 0 },
@@ -55,6 +57,8 @@ export function createBackgroundMaterial(shared) {
     fragmentShader: backgroundFragmentShader,
     uniforms: {
       uFrameSeed: shared.uFrameSeed,
+      uGrain: shared.uGrain,
+      uPixelScale: shared.uPixelScale,
       uResolution: { value: new Vector2(1920, 1080) },
       uGlowPos: { value: new Vector2(...BACKGROUND.glowPos) },
       uGlowAmt: { value: BACKGROUND.glowAmount },
