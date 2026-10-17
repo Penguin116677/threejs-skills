@@ -1676,7 +1676,8 @@ function initRack(THREE) {
       const dx = e.clientX - d.x, now = performance.now(), dt = Math.max(1, now - d.t);
       if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 6) { d.moved = true; STAGE.classList.add('is-drag'); S.snapTo = null; hideHint(); S.kb = -1; }
       if (d.moved) {
-        if (d.mode === 'rack') { const wpp = S.viewW / canvas.clientWidth; S.scroll += dx * wpp; d.v = lerp(d.v, dx * wpp / (dt / 1000), .5); }
+        // in the touch carousel garments sit only a slot apart, so damp the finger so one short swipe moves about one garment
+        if (d.mode === 'rack') { const wpp = S.viewW / canvas.clientWidth * (S.centerMode ? .32 : 1); S.scroll += dx * wpp; d.v = lerp(d.v, dx * wpp / (dt / 1000), .5); }
         else if (S.focus) { S.focus.yaw += dx * .011; d.v = lerp(d.v, dx * .011 / (dt / 1000), .5); S.focus.tilt = clamp(S.focus.tilt + (e.clientY - d.y) * .004, -.35, .35); }
       }
       d.x = e.clientX; d.y = e.clientY; d.t = now;
@@ -1690,7 +1691,7 @@ function initRack(THREE) {
   const endDrag = (e, cancelled) => {
     const d = S.drag; if (!d || d.id !== e.pointerId) return;
     S.drag = null; STAGE.classList.remove('is-drag');
-    if (d.moved) { if (d.mode === 'rack') S.scrollV = clamp(d.v, -14, 14); else if (S.focus) S.focus.yawV = clamp(d.v, -14, 14); return; }
+    if (d.moved) { if (d.mode === 'rack') S.scrollV = S.centerMode ? clamp(d.v, -1.6, 1.6) : clamp(d.v, -14, 14); else if (S.focus) S.focus.yawV = clamp(d.v, -14, 14); return; }
     if (cancelled) return;
     const h = pick(e.clientX, e.clientY);
     if (S.focus) { if (h !== S.focus.i) exitFocus(); return; }
